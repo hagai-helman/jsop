@@ -4,6 +4,12 @@
 
 It can be used instead of JSON where the amount of data makes the I/O operartions too slow. Also, it is designed to enable easy migration of data in existing applications, with minimal code changes.
 
+## Installation
+
+```bash
+pip install jsop
+```
+
 ## Quickstart Guide
 
 Create a new JSOP file:
