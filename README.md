@@ -1,4 +1,4 @@
-# JSOP - JSON Style Object Persistence
+# JSOP - JSON-Style Object Persistence
 
 **JSOP** is a python module that provides a DBM-based time-efficient persistence for JSON-style data.
 

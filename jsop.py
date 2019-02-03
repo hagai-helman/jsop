@@ -1,4 +1,4 @@
-"""The jsop module provides a DBM-based time-efficient persistence for JSON-style data.
+"""A DBM-based time-efficient persistence for JSON-style data.
 
 usage::
     from jsop import JSOP
