@@ -25,7 +25,7 @@ with jsop.JSOP("/path/to/file") as data:
     data["age"] = 30
     for friend in data["friends"]:
         print(friend["name"])
-```*JD
+```
 
 ## Supported Operations
 
