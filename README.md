@@ -109,7 +109,8 @@ a map.
 
 Like as in JDict, JList also supports the *collect()* method, that returns a python *list*:
 
+```python
 with jsop.JSOP(path) as data:
     my_list = data["map"]["array"].collect()
     # type(my_list) is list
-
+```
