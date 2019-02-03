@@ -1,3 +1,11 @@
+"""The jsop module provides a DBM-based time-efficient persistence for JSON-style data.
+
+usage::
+    from jsop import JSOP
+
+see help(JSOP) for more details, or visit https://github.com/hagai-helman/jsop for the full documentation.
+"""
+
 import dbm
 import json
 import random

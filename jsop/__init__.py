@@ -1,1 +1,0 @@
-from .jsop import JSOP
