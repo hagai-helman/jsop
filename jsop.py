@@ -72,7 +72,7 @@ def store(db, address, value):
     if address in db and isinstance(get(db, address), JObject):
         get(db, address).clear()
     if isinstance(value, JObject):
-        value = value.collect()
+        value = value.export()
     if isinstance(value, dict):
         db[address] = {}
         db[address + ('p',)] = None
@@ -156,11 +156,11 @@ class JDict(JObject):
         for key in self.keys():
             del self[key]
 
-    def collect(self):
+    def export(self):
         result = {}
         for key in self.keys():
             if isinstance(self[key], JObject):
-                result[key] = self[key].collect()
+                result[key] = self[key].export()
             else:
                 result[key] = self[key]
         return result
@@ -190,11 +190,11 @@ class JList(JObject):
     def clear(self):
         self._dict.clear()
 
-    def collect(self):
+    def export(self):
         result = []
         for item in self:
             if isinstance(item, JObject):
-                result.append(item.collect())
+                result.append(item.export())
             else:
                 result.append(item)
         return result
@@ -237,7 +237,7 @@ class JSOP(object):
             statement instead.
         """
         with DBMWrapper(self._filename, "r") as dbmw:
-            return get(dbmw, ()).collect()
+            return get(dbmw, ()).export()
 
     def __enter__(self):
         self._dbmw = DBMWrapper(self._filename, "w").__enter__()

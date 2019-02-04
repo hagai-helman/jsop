@@ -81,11 +81,11 @@ with jsop.JSOP(path) as data:
     my_map.clear()            # removing all keys from map
 ```
 
-Also, you can convert the map to a regular python *dict*, by using the *collect()* method:
+Also, you can convert the map to a regular python *dict*, by using the *export()* method:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_map = data["map"].collect()
+    my_map = data["map"].export()
     # type(my_map) is dict
 
     my_map["e"] = 5
@@ -113,10 +113,10 @@ with jsop.JSOP(path) as data:
 Note that indexing is not supported. If you need a list with random access, consider using
 a map.
 
-Like as in JDict, JList also supports the *collect()* method, that returns a python *list*:
+Like as in JDict, JList also supports the *export()* method, that returns a python *list*:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_list = data["map"]["array"].collect()
+    my_list = data["map"]["array"].export()
     # type(my_list) is list
 ```

@@ -21,7 +21,7 @@ with JSOP("/tmp/jsop_test.jsop") as data:
     data["list"].append(5)
 
 with JSOP("/tmp/jsop_test.jsop") as data:
-    assert data.collect() == {"int": 4, "map": {"a": 4, "list": [1,2,3]}, "list": [1,3,4,5], "7": 7, "null": None, "bool": True, "bool2": False}
+    assert data.export() == {"int": 4, "map": {"a": 4, "list": [1,2,3]}, "list": [1,3,4,5], "7": 7, "null": None, "bool": True, "bool2": False}
     assert data.keys() == ["int", "null", "map", "list", "7", "bool", "bool2"]
     for (a, b) in zip(data, data.keys()):
         assert a == b
@@ -37,5 +37,5 @@ with JSOP("/tmp/jsop_test.jsop") as data:
 
 
 with JSOP("/tmp/jsop_test.jsop") as data:
-    assert data["list"].collect() == []
-    assert data["map"].collect() == {}
+    assert data["list"].export() == []
+    assert data["map"].export() == {}
