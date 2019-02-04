@@ -201,6 +201,9 @@ class JList(JObject):
 
 ################################################################################
 
+class JSOPError(Exception):
+    pass
+
 class JSOP(object):
     """A dbm-based time-efficient persistence for JSON-style data.
     
@@ -226,6 +229,7 @@ class JSOP(object):
     def init(self, obj = {}):
         """Store a JSON-encodable object in a new JSOP file."""
         with DBMWrapper(self._filename, "n") as dbmw:
+            store(dbmw, ("m", "format-version"), "JSOP-1")
             store(dbmw, (), obj)
 
     def dump(self, obj = {}):
@@ -242,6 +246,13 @@ class JSOP(object):
         return self.export()
 
     def __enter__(self):
+        with DBMWrapper(self._filename, "r") as dbmw:
+            try:
+                format_version = get(dbmw, ("m", "format-type"))
+            except:
+                raise JSOPError("Cannot determine fromat version")
+        if format_version != "JSOP-1":
+            raise JSOPError("Unsupported format version: {}".format(format_version))
         self._dbmw = DBMWrapper(self._filename, "w").__enter__()
         return get(self._dbmw, ())
 
@@ -249,4 +260,4 @@ class JSOP(object):
         self._dbmw.__exit__(*args)
 
 
-__all__ = ["JSOP"]
+__all__ = ["JSOP", "JSOPError"]]
