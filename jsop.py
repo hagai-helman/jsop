@@ -223,21 +223,23 @@ class JSOP(object):
     def __init__(self, filename):
         self._filename = filename
 
-    def dump(self, obj):
+    def init(self, obj = {}):
         """Store a JSON-encodable object in a new JSOP file."""
         with DBMWrapper(self._filename, "n") as dbmw:
             store(dbmw, (), obj)
 
-    def load(self):
-        """Load a JSON-encodable object from a JSOP file.
+    def dump(self, obj = {}):
+        """Synonym of init()."""
+        self.init(obj)
 
-        Note:
-            If you want to read only part of the data, or change the data,
-            this method is not efficient. Use the JSOP object with in a with
-            statement instead.
-        """
-        with DBMWrapper(self._filename, "r") as dbmw:
-            return get(dbmw, ()).export()
+    def export(self):
+        """Get the data stored in the JSOP file as a Python native object."""
+        with self as data:
+            return data.export()
+
+    def load(self):
+        """Synonym of export()."""
+        return self.export()
 
     def __enter__(self):
         self._dbmw = DBMWrapper(self._filename, "w").__enter__()
