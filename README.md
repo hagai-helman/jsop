@@ -70,15 +70,15 @@ with jsop.JSOP(path) as data:
     my_map = data["map"]
     # type(my_map) is JDict    
     
-    a = my_map["a"]           # item access
-    my_map["b"] = 3           # item assignment
-    del my_map["c"]           # item removal
-    flag = ("d" in my_map)    # using the "in" operator
-    length = len(my_map)      # getting map's size
-    keys = my_map.keys()      # getting list of keys
+    a = my_map["a"]                  # item access
+    my_map["b"] = 3                  # item assignment
+    del my_map["c"]                  # item removal
+    flag = ("d" in my_map)           # using the "in" operator
+    length = len(my_map)             # getting map's size
+    keys = my_map.keys()             # getting list of keys
     for key in my_map:
-        pass                  # iteration over keys
-    my_map.clear()            # removing all keys from map
+        pass                         # iteration over keys
+    my_map.clear()                   # removing all keys from map
 ```
 
 Also, you can convert the map to a regular python *dict*, by using the *export()* method:
@@ -103,11 +103,17 @@ with jsop.JSOP(path) as data:
     # type(my_array) is JList
 
     for item in my_array:
-        pass                  # iteration
-    my_array.append(8)        # adding an item
-    my_array.remove(8)        # removing an item (note: may be slow for big lists)
-    length = len(my_array)    # getting array's size
-    my_array.clear()          # removing all items from array
+        pass                         # iteration over items
+
+    for cell in my_array.cells():    # iteration over cells
+        cell.value()                 # getting value in cell
+        cell.put("hello")            # setting value in cell
+        cell.remove()                # cell deletion
+
+    my_array.append(8)               # adding an item
+    my_array.remove(8)               # removing an item (note: this method iterates on all items)
+    length = len(my_array)           # getting array's size
+    my_array.clear()                 # removing all items from array
 ```
 
 Note that indexing is not supported. If you need a list with random access, consider using

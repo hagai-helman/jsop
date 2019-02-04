@@ -168,6 +168,25 @@ class JDict(JObject):
 def random_key():
     return "".join((random.choice("0123456789abcdef") for i in range(16)))
 
+
+class JCell(JObject):
+    def __init__(self, jdict, key):
+        self._dict = jdict
+        self._key = key
+
+    def value(self):
+        return self._dict[self._key]
+
+    def put(self, value):
+        self._dict[self._key] = value
+
+    def remove(self):
+        del self._dict[self._key]
+
+    def export(self):
+        return self.value().export()
+
+
 class JList(JObject):
     def __init__(self, db, address):
         self._dict = JDict(db, address)
@@ -186,6 +205,10 @@ class JList(JObject):
         for key in self._dict:
             if self._dict[key] == item:
                 del self._dict[key]
+
+    def cells(self):
+        for key in self._dict:
+            yield JCell(self._dict, key)
 
     def clear(self):
         self._dict.clear()
@@ -248,7 +271,7 @@ class JSOP(object):
     def __enter__(self):
         with DBMWrapper(self._filename, "r") as dbmw:
             try:
-                format_version = get(dbmw, ("m", "format-type"))
+                format_version = get(dbmw, ("m", "format-version"))
             except:
                 raise JSOPError("Cannot determine fromat version")
         if format_version != "JSOP-1":
@@ -260,4 +283,4 @@ class JSOP(object):
         self._dbmw.__exit__(*args)
 
 
-__all__ = ["JSOP", "JSOPError"]]
+__all__ = ["JSOP", "JSOPError"]

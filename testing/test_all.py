@@ -28,8 +28,13 @@ with JSOP("/tmp/jsop_test.jsop") as data:
     assert len(data["list"]) == 4
     for (a, b) in zip(data["list"], [1,3,4,5]):
         assert a == b
+    for cell in data["list"].cells():
+        if cell.value() == 3:
+            cell.put(6)
+        elif cell.value() == 4:
+            cell.remove()
 
-assert JSOP("/tmp/jsop_test.jsop").load() == {"int": 4, "map": {"a": 4, "list": [1,2,3]}, "list": [1,3,4,5], "7": 7, "null": None, "bool": True, "bool2": False}
+assert JSOP("/tmp/jsop_test.jsop").load() == {"int": 4, "map": {"a": 4, "list": [1,2,3]}, "list": [1,6,5], "7": 7, "null": None, "bool": True, "bool2": False}
 
 with JSOP("/tmp/jsop_test.jsop") as data:
     data["list"].clear()
