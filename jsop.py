@@ -290,7 +290,8 @@ __all__ = ["JSOP", "JSOPError"]
 import sys
 
 def print_usage():
-    print("""usage: {} <command> <JSOP-file-path> [<JSON-file-path>]
+    print("""
+    usage: python3 -m jsop <command> <JSOP-file-path> [<JSON-file-path>]
 
     Supported commands: init, export.
 
@@ -302,7 +303,7 @@ def print_usage():
     exported in JSON format.
     If a JSON file path is specified, the result will be saved to this file.
     Else, the result will be (beautifully) printed to the standard output.
-    """.format(sys.argv[0]))
+    """)
 
 if __name__ == "__main__":
     if 3 <= len(sys.argv) <= 4 and sys.argv[1] in ["init", "export"]:
