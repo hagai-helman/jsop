@@ -12,7 +12,7 @@ pip3 install jsop
 
 ## Quickstart Guide
 
-### Creating a new JSOP file:
+### Creating a new JSOP file
 
 Programmatically :
 
@@ -30,7 +30,7 @@ Or from the command line:
 python3 -m jsop init /path/to/file /path/to/data.json
 ```
 
-(If data is not given, the file will be initialized with an empty dictionary.)
+(If an initial JSON file is not given, the file will be initialized with an empty dictionary.)
 
 ### Read and Write
 
@@ -49,7 +49,7 @@ You can store any JSON-encodable data with JSOP using simple assignment. For exa
 ```python
 path = "/path/to/file"
 
-jsop.JSOP(path).dump({})
+jsop.JSOP(path).init()      # initalize with an empty dictionary.
 
 with jsop.JSOP(path) as data:
     data["string"] = "Hello, World!"
@@ -70,14 +70,14 @@ with jsop.JSOP(path) as data:
     # type(my_int) is int
 ```
 
-However, when you retrieve a map (dictionary) or an array (list), you get special objects, named *JDict* and *JList*, respectively.
+However, when you retrieve dictionary or a list, you get special objects, named *JDict* and *JList*, respectively.
 
 With *JDict*, you can do most of the things you can do with a python *dict*:
 
 ```python
 with jsop.JSOP(path) as data:
     my_map = data["map"]
-    # type(my_map) is JDict    
+    # type(my_map) is JDict
     
     a = my_map["a"]                  # item access
     my_map["b"] = 3                  # item assignment
@@ -113,16 +113,16 @@ with jsop.JSOP(path) as data:
 
     for item in my_array:
         pass                         # iteration over items
-
-    for cell in my_array.cells():    # iteration over cells
-        cell.value()                 # getting value in cell
-        cell.put("hello")            # setting value in cell
-        cell.remove()                # cell deletion
-
     my_array.append(8)               # adding an item
-    my_array.remove(8)               # removing an item (note: this method iterates on all items)
+    my_array.remove(8)               # removing an item (note: this method actually iterates over all items)
     length = len(my_array)           # getting array's size
     my_array.clear()                 # removing all items from array
+
+    for cell in my_array.cells():    # iteration over cells
+        my_value = cell.value()      # getting the value stored in a cell
+        cell.put("hello")            # setting the value stored in a cell
+        cell.remove()                # deleting a cell
+
 ```
 
 Note that indexing is not supported. If you need a list with random access, consider using
@@ -138,7 +138,7 @@ with jsop.JSOP(path) as data:
 
 ## Copy and Backup
 
-In order to copy a JSOP file, it is recommended to export its content to JSON.
+In order to create copy a JSOP file, it is recommended to export its content to JSON, since JSON files take less space.
 
 This can be done from the command line:
 
