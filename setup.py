@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jsop',
-    version='0.3',
+    version='0.3.1',
     author='Hagai Helman Tov',
     author_email='hagai.helman@gmail.com',
     description='A dbm-based time-efficient persistence for large amount of JSON-style data',
