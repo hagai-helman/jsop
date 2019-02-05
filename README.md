@@ -7,23 +7,32 @@ It can be used instead of JSON where the amount of data makes the I/O operartion
 ## Installation
 
 ```bash
-pip install jsop
+pip3 install jsop
 ```
 
 ## Quickstart Guide
 
-Create a new JSOP file:
+### Creating a new JSOP file:
+
+Programmatically :
 
 ```python
 # 'data' is any JSON-encodable data.
 
 import jsop
 
-jsop.JSOP("/path/to/file").dump(data)
+jsop.JSOP("/path/to/file").init(data)
 ```
 
+Or from the command line:
 
-Read and write:
+```bash
+python3 -m jsop init /path/to/file /path/to/data.json
+```
+
+(If data is not given, the file will be initialized with an empty dictionary.)
+
+### Read and Write
 
 ```python
 with jsop.JSOP("/path/to/file") as data:
@@ -126,3 +135,15 @@ with jsop.JSOP(path) as data:
     my_list = data["map"]["array"].export()
     # type(my_list) is list
 ```
+
+## Copy and Backup
+
+In order to copy a JSOP file, it is recommended to export its content to JSON.
+
+This can be done from the command line:
+
+```bash
+python3 -m jsop export /path/to/file /path/to/backup.json
+```
+
+If JSON file path is not given, the result will be printed to the standard output.

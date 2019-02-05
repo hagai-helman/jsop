@@ -284,3 +284,49 @@ class JSOP(object):
 
 
 __all__ = ["JSOP", "JSOPError"]
+
+################################################################################
+
+import sys
+
+def print_usage():
+    print("""usage: {} <command> <JSOP-file-path> [<JSON-file-path>]
+
+    Supported commands: init, export.
+
+    When command is "init", a new JSOP file will be created.
+    If a JSON file is specified, its content is used to initialize the file.
+    Else, the file will be initialized with an empty map ({}).
+
+    When command is "export", the content of the JSOP file will be
+    exported in JSON format.
+    If a JSON file path is specified, the result will be saved to this file.
+    Else, the result will be (beautifully) printed to the standard output.
+    """.format(sys.argv[0]))
+
+if __name__ == "__main__":
+    if 3 <= len(sys.argv) <= 4 and sys.argv[1] in ["init", "export"]:
+        command = sys.argv[1]
+        path = sys.argv[2]
+        if len(sys.argv) == 4:
+            json_path = sys.argv[3]
+        else:
+            json_path = None
+
+        if command == "init":
+            if json_path is None:
+                obj = {}
+            else:
+                obj = json.load(open(json_path))
+            JSOP(path).init(obj)
+
+        elif command == "export":
+            if json_path is None:
+                print(json.dumps(JSOP(path).export(), indent=1))
+            else:
+                json.dump(JSOP(path).export(), open(json_path, "w"))
+    else:
+        print_usage()
+        exit(1)
+
+
