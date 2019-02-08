@@ -127,6 +127,8 @@ class JDict(JObject):
         key = str(key)
         return get(self._db, self._address + ('k', key, 'v'))
 
+    # Note that given a new key, __setitem__ must **append** the new key to the linked
+    # list of keys. The JList.append() method relies on this behavior.
     def __setitem__(self, key, value):
         key = str(key)
         if key not in self:
@@ -140,6 +142,9 @@ class JDict(JObject):
             self._db[self._address + ('p',)] = key
         store(self._db, self._address + ('k', key, 'v'), value)
 
+    # This method is almost the same as __setitem__, but given a new key, it prepends it
+    # to the linked list of keys, rather than append it.
+    # It is used by the JList.prepend() method.
     def _prepend(self, key, value):
         key = str(key)
         if key not in self:
