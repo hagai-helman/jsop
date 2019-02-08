@@ -158,26 +158,25 @@ class JDict(JObject):
         return self._address + ('k', key, 'v') in self._db
 
     def __iter__(self):
-        return iter(self.keys())
+        key = self._db[self._address + ('n',)]
+        while key is not None:
+            next_key = self._db[self._address + ('k', key, 'n')]
+            yield key
+            key = next_key
 
     def __len__(self):
         return len(list(iter(self)))
 
     def keys(self):
-        result = []
-        key = self._db[self._address + ('n',)]
-        while key is not None:
-            result.append(key)
-            key = self._db[self._address + ('k', key, 'n')]
-        return result
+        return list(self)
 
     def clear(self):
-        for key in self.keys():
+        for key in self:
             del self[key]
 
     def export(self):
         result = {}
-        for key in self.keys():
+        for key in self:
             if isinstance(self[key], JObject):
                 result[key] = self[key].export()
             else:
