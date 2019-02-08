@@ -1,9 +1,28 @@
-"""A DBM-based time-efficient persistence for JSON-style data.
+"""A dbm-based persistence for JSON-style data.
 
-usage::
+It allows you to store a large amount of JSON-style data on disk, but to access it quickly and efficiently.
+
+
+To initialize a new JSOP database:
+
     from jsop import JSOP
 
-see help(JSOP) for more details, or visit https://github.com/hagai-helman/jsop for the full documentation.
+    # 'data' can be any JSON-serializable object
+    JSOP("/path/to/jsop").init(data)
+
+
+To access an existing JSOP database:
+
+    from jsop import JSOP
+
+    with JSOP("/path/to/jsop") as data:
+        name = data["name"]
+        data["age"] = 30
+        for friend in data["friends"]:
+            print(friend["name"])
+
+
+For the complete documentation, see https://github.com/hagai-helman/jsop.
 """
 
 import dbm
@@ -228,22 +247,31 @@ class JSOPError(Exception):
     pass
 
 class JSOP(object):
-    """A dbm-based time-efficient persistence for JSON-style data.
-    
-    Examples:
+    """A dbm-based persistence for JSON-style data.
 
-        Create a new JSOP file::
-            
-            # `data` is a JSON-encodable object.
-            JSOP("/path/to/file").dump(data)
+    It allows you to store a large amount of JSON-style data on disk, but to access it quickly and efficiently.
 
-        Read and write to an existing JSOP file::
 
-            with JSOP("/path/to/file") as data:
-                name = data["name"]
-                data["age"] = 30
-                for friend in data["friends"]:
-                    print(friend["name"])
+    To initialize a new JSOP database:
+
+        from jsop import JSOP
+
+        # 'data' can be any JSON-serializable object
+        JSOP("/path/to/jsop").init(data)
+
+
+    To access an existing JSOP database:
+
+        from jsop import JSOP
+
+        with JSOP("/path/to/jsop") as data:
+            name = data["name"]
+            data["age"] = 30
+            for friend in data["friends"]:
+                print(friend["name"])
+
+
+    For the complete documentation, see https://github.com/hagai-helman/jsop.
     """
 
     def __init__(self, filename):
@@ -295,7 +323,7 @@ def print_usage():
 
     Supported commands: init, export.
 
-    When command is "init", a new JSOP file will be created.
+    When command is "init", a new JSOP database will be created.
     If a JSON file is specified, its content is used to initialize the file.
     Else, the file will be initialized with an empty map ({}).
 

@@ -2,10 +2,10 @@ from setuptools import setup
 
 setup(
     name='jsop',
-    version='0.3.1',
+    version='0.3.2',
     author='Hagai Helman Tov',
     author_email='hagai.helman@gmail.com',
-    description='A dbm-based time-efficient persistence for large amount of JSON-style data',
+    description='A way to store large amounts of JSON-style data on disk, and to access it very quickly',
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
     url='https://github.com/hagai-helman/jsop',
