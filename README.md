@@ -118,8 +118,11 @@ with jsop.JSOP(path) as data:
 
     for item in my_array:
         pass                         # iteration over items
-    my_array.append(8)               # adding an item
+    my_array.append(8)               # adding an item (at the end)
+    my_array.prepend(8)              # adding an item (at the beginning)
     my_array.remove(8)               # removing an item (note: this method actually iterates over all items)
+    if 8 in my_array:
+        pass                         # using the "in" operator (note: this method also iterates over all items)
     length = len(my_array)           # getting array's size
     my_array.clear()                 # removing all items from array
 

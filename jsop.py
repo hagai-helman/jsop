@@ -76,7 +76,11 @@ class DBMWrapper(object):
 ################################################################################
 
 class JObject(object):
-    pass
+    def __eq__(self, other):
+        if isinstance(other, JObject):
+            return self.export() == other.export()
+        else:
+            return self.export() == other
 
 def get(db, address):
     value = db[address]
@@ -134,6 +138,19 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('n',)] = key
             self._db[self._address + ('p',)] = key
+        store(self._db, self._address + ('k', key, 'v'), value)
+
+    def _prepend(self, key, value):
+        key = str(key)
+        if key not in self:
+            first_key = self._db[self._address + ('n',)]
+            self._db[self._address + ('k', key, 'n')] = first_key
+            self._db[self._address + ('k', key, 'p')] = None
+            if first_key is not None:
+                self._db[self._address + ('k', first_key, 'p')] = key
+            else:
+                self._db[self._address + ('p',)] = key
+            self._db[self._address + ('n',)] = key
         store(self._db, self._address + ('k', key, 'v'), value)
 
     def __delitem__(self, key):
@@ -219,10 +236,20 @@ class JList(JObject):
     def append(self, item):
         self._dict[random_key()] = item
 
+    def prepend(self, item):
+        key = random_key()
+        self._dict._prepend(key, item)
+
     def remove(self, item):
         for key in self._dict:
             if self._dict[key] == item:
                 del self._dict[key]
+
+    def __contains__(self, item):
+        for key in self._dict:
+            if self._dict[key] == item:
+                return True
+        return False
 
     def cells(self):
         for key in self._dict:

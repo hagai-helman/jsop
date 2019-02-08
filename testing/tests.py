@@ -149,13 +149,23 @@ def test_dict(ctx):
 def test_list(ctx):
     JSOP(JSOP_PATH).init([])
     
-    ctx.stage("adding items")
+    ctx.stage("appending items")
     with JSOP(JSOP_PATH) as data:
         data.append(1)
         data.append("hello")
         data.append([1,2,3])
     with JSOP(JSOP_PATH) as data:
         assert data.export() == [1, "hello", [1,2,3]]
+
+    ctx.stage("prepending items")
+    with JSOP(JSOP_PATH) as data:
+        data.prepend(5)
+        data.prepend("this")
+        data.prepend({"foo": "bar"})
+    with JSOP(JSOP_PATH) as data:
+        assert data.export() == [{"foo": "bar"}, "this", 5, 1, "hello", [1,2,3]]
+
+    JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
 
     ctx.stage("iteration over items")
     with JSOP(JSOP_PATH) as data:
@@ -166,6 +176,14 @@ def test_list(ctx):
         assert result[:2] == [1, "hello"]
         assert type(result[2]) == type(data)
         assert result[2].export() == [1,2,3]
+
+    ctx.stage("using the 'in' operator")
+    with JSOP(JSOP_PATH) as data:
+        assert 1 in data
+        assert "hello" in data
+        assert 2 not in data
+        assert [1,2,3] in data
+        assert [4,5,6] not in data
 
     ctx.stage("remove")
     with JSOP(JSOP_PATH) as data:
