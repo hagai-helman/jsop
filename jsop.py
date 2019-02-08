@@ -22,7 +22,7 @@ To access an existing JSOP database:
             print(friend["name"])
 
 
-For the complete documentation, see https://github.com/hagai-helman/jsop.
+For the full documentation, see https://github.com/hagai-helman/jsop.
 """
 
 import dbm
@@ -271,7 +271,7 @@ class JSOP(object):
                 print(friend["name"])
 
 
-    For the complete documentation, see https://github.com/hagai-helman/jsop.
+    For the full documentation, see https://github.com/hagai-helman/jsop.
     """
 
     def __init__(self, filename):
@@ -319,7 +319,7 @@ import sys
 
 def print_usage():
     print("""
-    usage: python3 -m jsop <command> <JSOP-file-path> [<JSON-file-path>]
+    usage: python3 -m jsop <command> <JSOP-database-path> [<JSON-file-path>]
 
     Supported commands: init, export.
 

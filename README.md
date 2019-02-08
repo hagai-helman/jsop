@@ -23,7 +23,7 @@ Programmatically :
 
 import jsop
 
-jsop.JSOP("/path/to/dbm").init(data)
+jsop.JSOP("/path/to/jsop").init(data)
 ```
 
 Or from the command line:
@@ -32,7 +32,7 @@ Or from the command line:
 python3 -m jsop init /path/to/jsop /path/to/data.json
 ```
 
-(If an initial JSON file is not given, the file will be initialized with an empty dictionary.)
+(If an initial JSON file is not given, the file will be initialized with an empty map.)
 
 ### Read and Write
 
@@ -51,7 +51,7 @@ You can store any JSON-serializable data with JSOP using simple assignment. For 
 ```python
 path = "/path/to/jsop"
 
-jsop.JSOP(path).init()      # initalize with an empty dictionary.
+jsop.JSOP(path).init()      # initalize with an empty map.
 
 with jsop.JSOP(path) as data:
     data["string"] = "Hello, World!"
@@ -74,7 +74,7 @@ with jsop.JSOP(path) as data:
     # type(my_int) is int
 ```
 
-However, when you retrieve dictionary or a list, you get special objects, named ```JDict``` and ```JList```, respectively.
+However, when you retrieve a map or a list, you get special objects, named ```JDict``` and ```JList```, respectively.
 
 With ```JDict```, you can do most of the things you can do with a python ```dict```:
 
@@ -130,7 +130,7 @@ with jsop.JSOP(path) as data:
 
 ```
 
-Note that indexing is not supported. If you need a list with random access, consider using a dictionary instead.
+Note that indexing is not supported. If you need a list with random access, consider using a map instead.
 
 Like as in ```JDict```, ```JList``` also supports the ```export()``` method, which returns a python ```list```:
 
