@@ -58,7 +58,7 @@ with jsop.JSOP(path) as data:
     data["boolean"] = True
     data["map"] = {"a": 1, "b": 2, "c": 3}
     data["map"]["d"] = 4
-    data["map"]["array"] = [5,6,7]
+    data["map"]["list"] = [5,6,7]
 ```
 
 The file will be saved once the ```with``` block exits.
@@ -113,20 +113,20 @@ The ```JList``` object supports significantly less operations than a python ```l
 
 ```python
 with jsop.JSOP(path) as data:
-    my_array = data["map"]["array"]
-    # type(my_array) is JList
+    my_list = data["map"]["list"]
+    # type(my_list) is JList
 
-    for item in my_array:
+    for item in my_list:
         pass                         # iteration over items
-    my_array.append(8)               # adding an item (at the end)
-    my_array.prepend(8)              # adding an item (at the beginning)
-    my_array.remove(8)               # removing an item (note: this method actually iterates over all items)
-    if 8 in my_array:
+    my_list.append(8)                # adding an item (at the end)
+    my_list.prepend(8)               # adding an item (at the beginning)
+    my_list.remove(8)                # removing an item (note: this method actually iterates over all items)
+    if 8 in my_list:
         pass                         # using the "in" operator (note: this method also iterates over all items)
-    length = len(my_array)           # getting array's size
-    my_array.clear()                 # removing all items from array
+    length = len(my_list)            # getting list's size
+    my_list.clear()                  # removing all items from list
 
-    for cell in my_array.cells():    # iteration over cells
+    for cell in my_list.cells():     # iteration over cells
         my_value = cell.value()      # getting the value stored in a cell
         cell.put("hello")            # setting the value stored in a cell
         cell.remove()                # deleting a cell
@@ -139,7 +139,7 @@ Like as in ```JDict```, ```JList``` also supports the ```export()``` method, whi
 
 ```python
 with jsop.JSOP(path) as data:
-    my_list = data["map"]["array"].export()
+    my_list = data["map"]["list"].export()
     # type(my_list) is list
 ```
 
