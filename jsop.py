@@ -50,28 +50,28 @@ class DBMWrapper(object):
         self._dbm.__exit__(*args)
     
     def __getitem__(self, key):
-        bkey = b'\0'.join((s.encode("utf8") for s in key))
+        bkey = b'\xff'.join((s.encode("utf8") for s in key))
         if bkey not in self._cache:
             self._cache[key] = json.loads(self._dbm[bkey].decode("utf8"))
         return self._cache[key]
 
     def __setitem__(self, key, value):
-        bkey = b'\0'.join((s.encode("utf8") for s in key))
+        bkey = b'\xff'.join((s.encode("utf8") for s in key))
         bvalue = json.dumps(value).encode("utf8")
         self._dbm[bkey] = bvalue
         self._cache[key] = value
 
     def __delitem__(self, key):
-        bkey = b'\0'.join((s.encode("utf8") for s in key))
+        bkey = b'\xff'.join((s.encode("utf8") for s in key))
         del self._dbm[bkey]
         del self._cache[key]
 
     def __contains__(self, key):
-        bkey = b'\0'.join((s.encode("utf8") for s in key))
+        bkey = b'\xff'.join((s.encode("utf8") for s in key))
         return bkey in self._dbm
 
     def keys(self):
-        return [tuple([s.decode("utf8") for s in bkey.split(b'\0')]) for bkey in self._dbm.keys()]
+        return [tuple([s.decode("utf8") for s in bkey.split(b'\xff')]) for bkey in self._dbm.keys()]
 
 ################################################################################
 
