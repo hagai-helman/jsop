@@ -57,6 +57,20 @@ def test_cli(ctx):
     result = json.load(open(JSON_PATH))
     assert result == expected_value
 
+@testing.test("are values eqaul?")
+def test_eq(ctx):
+    JSOP(JSOP_PATH).init({"map": {"a": 1, "b": 2}, "list": [1,2,3]})
+    with JSOP(JSOP_PATH) as data:
+        assert data["map"] == {"a": 1, "b": 2}
+        assert data["map"] != {"a": 2, "b": 1}
+        assert not (data["map"] == {"a": 2, "b": 1})
+        assert data["list"] == [1,2,3]
+        assert data["list"] != [4,5,6]
+        assert not (data["list"] == [4,5,6])
+        assert data == {"map": {"a": 1, "b": 2}, "list": [1,2,3]}
+        assert data != {"map": {"a": 2, "b": 1}, "list": [4,5,6]}
+        assert not (data == {"map": {"a": 2, "b": 1}, "list": [4,5,6]})
+
 
 @testing.test("dictionary test")
 def test_dict(ctx):
@@ -70,11 +84,11 @@ def test_dict(ctx):
 
     ctx.stage("item access (a dictionary)")
     with JSOP(JSOP_PATH) as data:
-        assert data["map"].export() == {"a": 4, "list": [1,2,3]}
+        assert data["map"] == {"a": 4, "list": [1,2,3]}
 
     ctx.stage("item access (a list)")
     with JSOP(JSOP_PATH) as data:
-        assert data["list"].export() == [1,6,5]
+        assert data["list"] == [1,6,5]
 
     ctx.stage("item assignment (primitive types)")
     with JSOP(JSOP_PATH) as data:
@@ -92,19 +106,19 @@ def test_dict(ctx):
     with JSOP(JSOP_PATH) as data:
         data["map2"] = {"aaa": 1, "bbb": [2, 3]}
     with JSOP(JSOP_PATH) as data:
-        assert data["map2"].export() == {"aaa": 1, "bbb": [2, 3]}
+        assert data["map2"] == {"aaa": 1, "bbb": [2, 3]}
 
     ctx.stage("item assignment (a list)")
     with JSOP(JSOP_PATH) as data:
         data["list2"] = ["A", "B", {"C": 8}]
     with JSOP(JSOP_PATH) as data:
-        assert data["list2"].export() == ["A", "B", {"C": 8}]
+        assert data["list2"] == ["A", "B", {"C": 8}]
 
     ctx.stage("item removal")
     with JSOP(JSOP_PATH) as data:
         del data["map2"]["bbb"]
     with JSOP(JSOP_PATH) as data:
-        assert data["map2"].export() == {"aaa": 1}
+        assert data["map2"] == {"aaa": 1}
 
     ctx.stage("the 'in' operator")
     with JSOP(JSOP_PATH) as data:
@@ -143,7 +157,7 @@ def test_dict(ctx):
     with JSOP(JSOP_PATH) as data:
         data.clear()
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == {}
+        assert data == {}
 
 @testing.test("list test")
 def test_list(ctx):
@@ -155,7 +169,7 @@ def test_list(ctx):
         data.append("hello")
         data.append([1,2,3])
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, "hello", [1,2,3]]
+        assert data == [1, "hello", [1,2,3]]
 
     ctx.stage("prepending items")
     with JSOP(JSOP_PATH) as data:
@@ -163,7 +177,7 @@ def test_list(ctx):
         data.prepend("this")
         data.prepend({"foo": "bar"})
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [{"foo": "bar"}, "this", 5, 1, "hello", [1,2,3]]
+        assert data == [{"foo": "bar"}, "this", 5, 1, "hello", [1,2,3]]
 
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
 
@@ -172,10 +186,7 @@ def test_list(ctx):
         result = []
         for item in data:
             result.append(item)
-        assert len(result) == 3
-        assert result[:2] == [1, "hello"]
-        assert type(result[2]) == type(data)
-        assert result[2].export() == [1,2,3]
+        assert result == [1, "hello", [1,2,3]]
 
     ctx.stage("using the 'in' operator")
     with JSOP(JSOP_PATH) as data:
@@ -189,19 +200,19 @@ def test_list(ctx):
     with JSOP(JSOP_PATH) as data:
         data.remove("hello")
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, [1,2,3]]
+        assert data == [1, [1,2,3]]
     with JSOP(JSOP_PATH) as data:
         data.append(2)
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, [1,2,3], 2]
+        assert data == [1, [1,2,3], 2]
     with JSOP(JSOP_PATH) as data:
         data.remove(2)
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, [1,2,3]]
+        assert data == [1, [1,2,3]]
     with JSOP(JSOP_PATH) as data:
         data.remove(1)
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [[1,2,3]]
+        assert data == [[1,2,3]]
 
     ctx.stage("getting list's size")
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
@@ -213,10 +224,7 @@ def test_list(ctx):
         result = []
         for cell in data.cells():
             result.append(cell.value())
-        assert len(result) == 3
-        assert result[:2] == [1, "hello"]
-        assert type(result[2]) == type(data)
-        assert result[2].export() == [1,2,3]
+        assert result == [1, "hello", [1,2,3]]
 
     ctx.stage("setting cell's value")
     with JSOP(JSOP_PATH) as data:
@@ -224,7 +232,7 @@ def test_list(ctx):
             if i == 1:
                 cell.put("world")
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, "world", [1,2,3]]
+        assert data == [1, "world", [1,2,3]]
 
     ctx.stage("removing a cell")
     with JSOP(JSOP_PATH) as data:
@@ -232,28 +240,28 @@ def test_list(ctx):
             if i == 1:
                 cell.remove()
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [1, [1,2,3]]
+        assert data == [1, [1,2,3]]
 
     with JSOP(JSOP_PATH) as data:
         for (i, cell) in enumerate(data.cells()):
             if i == 0:
                 cell.remove()
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == [[1,2,3]]
+        assert data == [[1,2,3]]
 
     with JSOP(JSOP_PATH) as data:
         for (i, cell) in enumerate(data.cells()):
             if i == 0:
                 cell.remove()
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == []
+        assert data == []
 
     ctx.stage("clear")
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
     with JSOP(JSOP_PATH) as data:
         data.clear()
     with JSOP(JSOP_PATH) as data:
-        assert data.export() == []
+        assert data == []
 
 
 if __name__ == "__main__":
