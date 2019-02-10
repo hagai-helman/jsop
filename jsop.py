@@ -33,6 +33,48 @@ FORMAT_NAME = "JSOP"
 FORMAT_VERSION_MAJOR = 1
 FORMAT_VERSION_MINOR = 0
 
+#
+#   This file is divided to four sections. Each section is based on the previous
+#   sections, but totally independent of the next sections:
+#
+#  I.   DBMWrappwer
+#       ***********
+#
+#       A class that wraps a DBM object, to store a mapping of:
+#       (list of unicode strings) ==> (a JSON-serializable object).
+#
+#       The JSOP data structure assumes we have such a mapping.
+#
+#
+#  II.  The Core
+#       ********
+#
+#       The classes defined in this section provide an interface to objects in
+#       a JSOP file - including objects that are distributed between several keys
+#       of a DBMWrapper.
+#
+#       This is the core section of this module.
+#
+#
+#  III. The API
+#       *******
+#
+#       This section defines the public interface for this module.
+#
+#
+#  IV.  The CLI
+#       *******
+#
+#       This section defines the module's command line interface.
+#
+
+
+
+####################         SECTION I: DBMWrapper         ####################
+
+
+
+
 class DBMWrapper(object):
     """A wrapper for a DBM, with three features:
 
@@ -77,7 +119,10 @@ class DBMWrapper(object):
     def keys(self):
         return [tuple([s.decode("utf8") for s in bkey.split(b'\xff')]) for bkey in self._dbm.keys()]
 
-################################################################################
+
+
+####################         SECTION II: The Core         ####################
+
 
 class JData(object):
     """A wrapper for DBMWrapper, that handles JObjects.
@@ -135,7 +180,6 @@ class JData(object):
 
     def __contains__(self, address):
         return address in self._db
-
 
 
 class JObject(object):
@@ -212,7 +256,6 @@ class JDict(JObject):
         else:
             self._db[self._address + ('p',)] = prev_key
 
-
     def __contains__(self, key):
         key = str(key)
         return self._address + ('k', key, 'v') in self._db
@@ -243,26 +286,9 @@ class JDict(JObject):
                 result[key] = self[key]
         return result
 
+
 def random_key():
     return "".join((random.choice("0123456789abcdef") for i in range(16)))
-
-
-class JCell(JObject):
-    def __init__(self, jdict, key):
-        self._dict = jdict
-        self._key = key
-
-    def value(self):
-        return self._dict[self._key]
-
-    def put(self, value):
-        self._dict[self._key] = value
-
-    def remove(self):
-        del self._dict[self._key]
-
-    def export(self):
-        return self.value().export()
 
 
 class JList(JObject):
@@ -310,7 +336,29 @@ class JList(JObject):
                 result.append(item)
         return result
 
-################################################################################
+
+class JCell(JObject):
+    def __init__(self, jdict, key):
+        self._dict = jdict
+        self._key = key
+
+    def value(self):
+        return self._dict[self._key]
+
+    def put(self, value):
+        self._dict[self._key] = value
+
+    def remove(self):
+        del self._dict[self._key]
+
+    def export(self):
+        return self.value().export()
+
+
+
+####################         SECTION III: The API         ####################
+
+
 
 class JSOPError(Exception):
     pass
@@ -392,7 +440,10 @@ class JSOP(object):
 
 __all__ = ["JSOP", "JSOPError"]
 
-################################################################################
+
+
+####################          SECTION IV: The CLI          ####################
+
 
 import sys
 
