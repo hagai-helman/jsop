@@ -19,7 +19,7 @@ pip3 install jsop
 Programmatically :
 
 ```python
-# 'data' is any JSON-serializable data.
+# 'data' is any JSON-serializable object.
 
 import jsop
 
@@ -121,7 +121,7 @@ Note that like a JSON map, the keys in a JSOP map are always strings. If a diffe
 
 ### List Operations
 
-The ```JList``` object does **not** support all operations supported by a python ```list```. It should be thought of as a linked list. This are the operations it supports:
+The ```JList``` object does **not** support all operations supported by a python ```list```. It should be thought of as a linked list. These are the operations it supports:
 
 ```python
 with jsop.JSOP(path) as data:
