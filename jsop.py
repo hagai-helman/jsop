@@ -79,8 +79,67 @@ class DBMWrapper(object):
 
 ################################################################################
 
+class JData(object):
+    """A wrapper for DBMWrapper, that handles JObjects.
+
+    In a JSOP database, maps and lists are not stored as plain JSON objects.
+    Instead, an empty map or an empty list is stored at the address, "hinting" 
+    the type of the object, while the object data itself is stored in other 
+    addresses (derived from the original address).
+
+    This wrapper handles two things:
+
+    1. If the user tries to fetch a map or a list, it wraps it with a JDict or
+       a JList object, respectively.
+    2. If the user tried to delete or override amap or a list, it first clears
+       it, to ensure that all garbage in the database will be collected.
+    """
+    def __init__(self, db):
+        self._db = db
+
+    def __getitem__(self, address):
+        value = self._db[address]
+        if isinstance(value, dict):
+            return JDict(self, address)
+        elif isinstance(value, list):
+            return JList(self, address)
+        else:
+            return value
+
+    def __setitem__(self, address, value):
+        if address in self._db and isinstance(self[address], JObject):
+            self[address].clear()
+        if isinstance(value, JObject):
+            value = value.export()
+        if isinstance(value, dict):
+            self._db[address] = {}
+            self._db[address + ('p',)] = None
+            self._db[address + ('n',)] = None
+            new_dict = JDict(self, address)
+            for key in value:
+                new_dict[key] = value[key]
+        elif isinstance(value, list) or isinstance(value, tuple):
+            self._db[address] = []
+            self._db[address + ('p',)] = None
+            self._db[address + ('n',)] = None
+            new_list = JList(self, address)
+            for item in value:
+                new_list.append(item)
+        else:
+            self._db[address] = value
+
+    def __delitem__(self, address):
+        if address in self._db and isinstance(self[address], JObject):
+            self[address].clear()
+        del self._db[address]
+
+    def __contains__(self, address):
+        return address in self._db
+
+
+
 class JObject(object):
-    """A base class for all JSON-style objects."""
+    """A base class for non-primitive JSON-style objects."""
 
     def export(self):
         """Return a copy of self, as a Python native object."""
@@ -96,44 +155,6 @@ class JObject(object):
         else:
             return self.export() == other
 
-def get(db, address):
-    """Get the object stored in a specific address."""
-    value = db[address]
-    if isinstance(value, dict):
-        return JDict(db, address)
-    elif isinstance(value, list):
-        return JList(db, address)
-    else:
-        return value
-
-def store(db, address, value):
-    """Store an object in a specific address."""
-    if address in db and isinstance(get(db, address), JObject):
-        get(db, address).clear()
-    if isinstance(value, JObject):
-        value = value.export()
-    if isinstance(value, dict):
-        db[address] = {}
-        db[address + ('p',)] = None
-        db[address + ('n',)] = None
-        new_dict = JDict(db, address)
-        for key in value:
-            new_dict[key] = value[key]
-    elif isinstance(value, list) or isinstance(value, tuple):
-        db[address] = []
-        db[address + ('p',)] = None
-        db[address + ('n',)] = None
-        new_list = JList(db, address)
-        for item in value:
-            new_list.append(item)
-    else:
-        db[address] = value
-
-def remove(db, address):
-    """Delete the object in a specific address."""
-    if address in db and isinstance(get(db, address), JObject):
-        get(db, address).clear()
-    del db[address]
 
 class JDict(JObject): 
     def __init__(self, db, address):
@@ -142,7 +163,7 @@ class JDict(JObject):
 
     def __getitem__(self, key):
         key = str(key)
-        return get(self._db, self._address + ('k', key, 'v'))
+        return self._db[self._address + ('k', key, 'v')]
 
     # Note that given a new key, __setitem__ must **append** the new key to the linked
     # list of keys. The JList.append() method relies on this behavior.
@@ -157,7 +178,7 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('n',)] = key
             self._db[self._address + ('p',)] = key
-        store(self._db, self._address + ('k', key, 'v'), value)
+        self._db[self._address + ('k', key, 'v')] = value
 
     # This method is almost the same as __setitem__, but given a new key, it prepends it
     # to the linked list of keys, rather than append it.
@@ -173,15 +194,15 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('p',)] = key
             self._db[self._address + ('n',)] = key
-        store(self._db, self._address + ('k', key, 'v'), value)
+        self._db[self._address + ('k', key, 'v')] = value
 
     def __delitem__(self, key):
         key = str(key)
         prev_key = self._db[self._address + ('k', key, 'p')]
         next_key = self._db[self._address + ('k', key, 'n')]
-        remove(self._db, self._address + ('k', key, 'v'))
-        remove(self._db, self._address + ('k', key, 'p'))
-        remove(self._db, self._address + ('k', key, 'n'))
+        del self._db[self._address + ('k', key, 'v')]
+        del self._db[self._address + ('k', key, 'p')]
+        del self._db[self._address + ('k', key, 'n')]
         if prev_key is not None:
             self._db[self._address + ('k', prev_key, 'n')] = next_key
         else:
@@ -328,10 +349,11 @@ class JSOP(object):
     def init(self, obj = {}):
         """Store a JSON-encodable object in a new JSOP file."""
         with DBMWrapper(self._filename, "n") as dbmw:
-            store(dbmw, ("m", "format-name"), FORMAT_NAME)
-            store(dbmw, ("m", "format-version-major"), FORMAT_VERSION_MAJOR)
-            store(dbmw, ("m", "format-version-minor"), FORMAT_VERSION_MINOR)
-            store(dbmw, (), obj)
+            jdata = JData(dbmw)
+            jdata[("m", "format-name")] = FORMAT_NAME
+            jdata[("m", "format-version-major")] = FORMAT_VERSION_MAJOR
+            jdata[("m", "format-version-minor")] = FORMAT_VERSION_MINOR
+            jdata[()] = obj
 
     def dump(self, obj = {}):
         """Synonym of init()."""
@@ -348,10 +370,11 @@ class JSOP(object):
 
     def __enter__(self):
         with DBMWrapper(self._filename, "r") as dbmw:
+            jdata = JData(dbmw)
             try:
-                format_name = get(dbmw, ("m", "format-name"))
-                format_version_major = get(dbmw, ("m", "format-version-major"))
-                format_version_minor = get(dbmw, ("m", "format-version-minor"))
+                format_name = jdata[("m", "format-name")]
+                format_version_major = jdata[("m", "format-version-major")]
+                format_version_minor = jdata[("m", "format-version-minor")]
             except:
                 raise JSOPError("Cannot determine fromat version")
         supported_format = True
@@ -361,7 +384,7 @@ class JSOP(object):
         if not supported_format:
             raise JSOPError("Unsupported format version: {} {}.{}".format(format_name, format_version_major, format_version_minor))
         self._dbmw = DBMWrapper(self._filename, "w").__enter__()
-        return get(self._dbmw, ())
+        return JData(self._dbmw)[()]
 
     def __exit__(self, *args):
         self._dbmw.__exit__(*args)
