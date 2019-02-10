@@ -29,6 +29,10 @@ import dbm
 import json
 import random
 
+FORMAT_NAME = "JSOP"
+FORMAT_VERSION_MAJOR = 1
+FORMAT_VERSION_MINOR = 0
+
 class DBMWrapper(object):
     """A wrapper for a DBM, with three features:
 
@@ -311,7 +315,9 @@ class JSOP(object):
     def init(self, obj = {}):
         """Store a JSON-encodable object in a new JSOP file."""
         with DBMWrapper(self._filename, "n") as dbmw:
-            store(dbmw, ("m", "format-version"), "JSOP-1")
+            store(dbmw, ("m", "format-name"), FORMAT_NAME)
+            store(dbmw, ("m", "format-version-major"), FORMAT_VERSION_MAJOR)
+            store(dbmw, ("m", "format-version-minor"), FORMAT_VERSION_MINOR)
             store(dbmw, (), obj)
 
     def dump(self, obj = {}):
@@ -330,11 +336,17 @@ class JSOP(object):
     def __enter__(self):
         with DBMWrapper(self._filename, "r") as dbmw:
             try:
-                format_version = get(dbmw, ("m", "format-version"))
+                format_name = get(dbmw, ("m", "format-name"))
+                format_version_major = get(dbmw, ("m", "format-version-major"))
+                format_version_minor = get(dbmw, ("m", "format-version-minor"))
             except:
                 raise JSOPError("Cannot determine fromat version")
-        if format_version != "JSOP-1":
-            raise JSOPError("Unsupported format version: {}".format(format_version))
+        supported_format = True
+        supported_format &= (format_name == FORMAT_NAME)
+        supported_format &= (format_version_major == FORMAT_VERSION_MAJOR)
+        supported_format &= (format_version_minor <= FORMAT_VERSION_MINOR)
+        if not supported_format:
+            raise JSOPError("Unsupported format version: {} {}.{}".format(format_name, format_version_major, format_version_minor))
         self._dbmw = DBMWrapper(self._filename, "w").__enter__()
         return get(self._dbmw, ())
 
