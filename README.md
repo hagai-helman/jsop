@@ -46,6 +46,8 @@ with jsop.JSOP("/path/to/jsop") as data:
 
 ## Supported Operations
 
+### Assignments
+
 You can store any JSON-serializable data with JSOP using simple assignment. For example:
 
 ```python
@@ -63,6 +65,8 @@ with jsop.JSOP(path) as data:
 
 The file will be saved once the ```with``` block exits.
 
+### Accessing Data
+
 When you retrieve data of primitive types, you just get the corresponding python type:
 
 ```python
@@ -75,6 +79,8 @@ with jsop.JSOP(path) as data:
 ```
 
 However, when you retrieve a map or a list, you get special objects, named ```JDict``` and ```JList```, respectively.
+
+### Map Operations
 
 With ```JDict```, you can do most of the things you can do with a python ```dict```:
 
@@ -92,7 +98,11 @@ with jsop.JSOP(path) as data:
     keys = my_map.keys()             # getting list of keys
     for key in my_map:
         pass                         # iteration over keys
-    my_map.clear()                   # removing all keys from map
+    if my_map == my_map:
+        pass                         # comparison with a JDict
+    if my_map == {"a": 1, "b": 3}:
+        pass                         # comparison with a Python dict
+    my_map.clear()                   # removing all keys from a map
 ```
 
 Also, you can convert the map to a regular python ```dict```, by using the ```export()``` method:
@@ -109,7 +119,9 @@ with jsop.JSOP(path) as data:
 
 Note that like a JSON map, the keys in a JSOP map are always strings. If a different object is given as a key, it is converted to a string.
 
-The ```JList``` object supports significantly less operations than a python ```list```:
+### List Operations
+
+The ```JList``` object does **not** support all operations supported by a python ```list```. It should be thought of as a linked list. This are the operations it supports:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -124,6 +136,10 @@ with jsop.JSOP(path) as data:
     if 8 in my_list:
         pass                         # using the "in" operator (note: this method also iterates over all items)
     length = len(my_list)            # getting list's size
+    if my_list == my_list:
+        pass                         # comparison with a JList
+    if my_list == [5,6,7]:
+        pass                         # comparison with a Python list
     my_list.clear()                  # removing all items from list
 
     for cell in my_list.cells():     # iteration over cells
