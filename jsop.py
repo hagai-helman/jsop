@@ -38,7 +38,7 @@ class DBMWrapper(object):
 
     * The keys are tuples of (unicode) strings (instead of bytearrays);
     * The values are any JSON-encodable object (instead of bytearrays);
-    * A cache is used to avoid I/O operations.
+    * A cache is used to avoid unnecessary I/O operations.
 
     The usage is similar to a dbm object.
     """
@@ -80,6 +80,16 @@ class DBMWrapper(object):
 ################################################################################
 
 class JObject(object):
+    """A base class for all JSON-style objects."""
+
+    def export(self):
+        """Return a copy of self, as a Python native object."""
+        raise NotImplemented()
+
+    def clear(self):
+        """Remove all sub-objects of self."""
+        raise NotImplemented()
+
     def __eq__(self, other):
         if isinstance(other, JObject):
             return self.export() == other.export()
@@ -87,6 +97,7 @@ class JObject(object):
             return self.export() == other
 
 def get(db, address):
+    """Get the object stored in a specific address."""
     value = db[address]
     if isinstance(value, dict):
         return JDict(db, address)
@@ -96,6 +107,7 @@ def get(db, address):
         return value
 
 def store(db, address, value):
+    """Store an object in a specific address."""
     if address in db and isinstance(get(db, address), JObject):
         get(db, address).clear()
     if isinstance(value, JObject):
@@ -118,6 +130,7 @@ def store(db, address, value):
         db[address] = value
 
 def remove(db, address):
+    """Delete the object in a specific address."""
     if address in db and isinstance(get(db, address), JObject):
         get(db, address).clear()
     del db[address]
