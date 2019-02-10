@@ -65,9 +65,9 @@ As we have mentioned, ```DBM[addr] == {}```.
 
 Every key of the map is a unicode string, since keys in JSON maps are always strings. For every such key, denoted as ```key```, the address of the corresponding value will be ```DBM[addr + ["k", key, "v"]```.
 
-In addition, the keys form a linked-list. ```DBM[addr + ["k", key, "p"]]``` will be the previous key (as a string), and ```DBM[addr + ["k", key, "n"]]``` will be the next key (again, as a string).
+In addition, the keys form a linked-list. ```DBM[addr + ["k", key, "p"]]``` will be the previous key (as a string), and ```DBM[addr + ["k", key, "n"]]``` will be the next key (again, as a string). If ```key``` is the first key, then ```DBM[addr + ["k", key, "p"]] == null```. If ```key``` is the last key, then ```DBM[addr + ["k", key, "n"]] == null```.
 
-The value of ```DBM[addr + ["n"]]``` will be the first key, and ```DBM[addr + ["p"]]``` will be the last key.
+The value of ```DBM[addr + ["n"]]``` will be the first key, and ```DBM[addr + ["p"]]``` will be the last key. If the map is empty, they both will be ```null```.
 
 
 ### Lists
