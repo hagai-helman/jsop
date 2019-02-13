@@ -238,6 +238,13 @@ def test_list(ctx):
         data.remove("world")
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 3
+        data.prepend("world")
+        assert len(data) == 4
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 4
+        data.remove("world")
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 3
 
     ctx.stage("getting cell's value")
     with JSOP(JSOP_PATH) as data:

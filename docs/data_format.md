@@ -69,6 +69,8 @@ In addition, the keys form a linked-list. ```DBM[addr + ["k", key, "p"]]``` will
 
 The value of ```DBM[addr + ["n"]]``` will be the first key, and ```DBM[addr + ["p"]]``` will be the last key. If the map is empty, they both will be ```null```.
 
+Finally, the value of ```DBM[addr + ["m", "size"]]``` will always store the number of keys in the map.
+
 
 ### Lists
 

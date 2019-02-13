@@ -160,6 +160,7 @@ class JData(object):
             self._db[address] = {}
             self._db[address + ('p',)] = None
             self._db[address + ('n',)] = None
+            self._db[address + ('m', 'size')] = 0
             new_dict = JDict(self, address)
             for key in value:
                 new_dict[key] = value[key]
@@ -167,6 +168,7 @@ class JData(object):
             self._db[address] = []
             self._db[address + ('p',)] = None
             self._db[address + ('n',)] = None
+            self._db[address + ('m', 'size')] = 0
             new_list = JList(self, address)
             for item in value:
                 new_list.append(item)
@@ -222,6 +224,7 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('n',)] = key
             self._db[self._address + ('p',)] = key
+            self._db[self._address + ('m', 'size')] += 1
         self._db[self._address + ('k', key, 'v')] = value
 
     # This method is almost the same as __setitem__, but given a new key, it prepends it
@@ -238,9 +241,12 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('p',)] = key
             self._db[self._address + ('n',)] = key
+            self._db[self._address + ('m', 'size')] += 1
         self._db[self._address + ('k', key, 'v')] = value
 
     def __delitem__(self, key):
+        if key not in self:
+            raise KeyError(repr(key))
         key = str(key)
         prev_key = self._db[self._address + ('k', key, 'p')]
         next_key = self._db[self._address + ('k', key, 'n')]
@@ -255,6 +261,7 @@ class JDict(JObject):
             self._db[self._address + ('k', next_key, 'p')] = prev_key
         else:
             self._db[self._address + ('p',)] = prev_key
+        self._db[self._address + ('m', 'size')] -= 1
 
     def __contains__(self, key):
         key = str(key)
@@ -268,7 +275,7 @@ class JDict(JObject):
             key = next_key
 
     def __len__(self):
-        return len(list(iter(self)))
+        return self._db[self._address + ('m', 'size')]
 
     def keys(self):
         return list(self)
@@ -300,7 +307,7 @@ class JList(JObject):
             yield self._dict[key]
 
     def __len__(self):
-        return len(list(iter(self)))
+        return len(self._dict)
 
     def append(self, item):
         self._dict[random_key()] = item
