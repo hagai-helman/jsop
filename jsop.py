@@ -152,26 +152,18 @@ class JData(object):
             return value
 
     def __setitem__(self, address, value):
-        if address in self._db and isinstance(self[address], JObject):
-            self[address].clear()
+        if address in self._db:
+            del self[address]
         if isinstance(value, JObject):
             value = value.export()
         if isinstance(value, dict):
             self._db[address] = {}
-            self._db[address + ('p',)] = None
-            self._db[address + ('n',)] = None
-            self._db[address + ('m', 'size')] = 0
             new_dict = JDict(self, address)
-            for key in value:
-                new_dict[key] = value[key]
+            new_dict.init(value)
         elif isinstance(value, list) or isinstance(value, tuple):
             self._db[address] = []
-            self._db[address + ('p',)] = None
-            self._db[address + ('n',)] = None
-            self._db[address + ('m', 'size')] = 0
             new_list = JList(self, address)
-            for item in value:
-                new_list.append(item)
+            new_list.init(value)
         else:
             self._db[address] = value
 
@@ -186,6 +178,14 @@ class JData(object):
 
 class JObject(object):
     """A base class for non-primitive JSON-style objects."""
+
+    def init(self, value):
+        """Initialize the subtree under self's address.
+        
+        Assume there is no values in the subtree (other than its root) and
+        hence garbage collection is not needed.
+        """
+        raise NotImplemented()
 
     def export(self):
         """Return a copy of self, as a Python native object."""
@@ -206,6 +206,13 @@ class JDict(JObject):
     def __init__(self, db, address):
         self._db = db
         self._address = address
+
+    def init(self, value):
+        self._db[self._address + ('p',)] = None
+        self._db[self._address + ('n',)] = None
+        self._db[self._address + ('m', 'size')] = 0
+        for key in value:
+            self[key] = value[key]
 
     def __getitem__(self, key):
         key = str(key)
@@ -301,6 +308,11 @@ def random_key():
 class JList(JObject):
     def __init__(self, db, address):
         self._dict = JDict(db, address)
+
+    def init(self, value):
+        self._dict.init({})
+        for item in value:
+            self.append(item)
 
     def __iter__(self):
         for key in self._dict:
