@@ -131,7 +131,20 @@ def test_dict(ctx):
     ctx.stage("getting dictionary's size")
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 10
+        data["x"] = None
+        assert len(data) == 11
+        data["map2"]["bbb"] = 2
+    with JSOP(JSOP_PATH) as data:
+        assert len(data["map2"]) == 2
+        assert len(data) == 11
+        data["map2"] = {"aaa": 1}
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 11
         assert len(data["map2"]) == 1
+    with JSOP(JSOP_PATH) as data:
+        del data["x"]
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 10
 
     ctx.stage("the keys() method")
     with JSOP(JSOP_PATH) as data:
@@ -216,6 +229,13 @@ def test_list(ctx):
 
     ctx.stage("getting list's size")
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 3
+        data.append("world")
+        assert len(data) == 4
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 4
+        data.remove("world")
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 3
 
