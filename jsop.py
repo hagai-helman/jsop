@@ -136,7 +136,7 @@ class JData(object):
 
     1. If the user tries to fetch a map or a list, it wraps it with a JDict or
        a JList object, respectively.
-    2. If the user tried to delete or override amap or a list, it first clears
+    2. If the user tried to delete or override a map or a list, it first clears
        it, to ensure that all garbage in the database will be collected.
     """
     def __init__(self, db):
@@ -181,7 +181,7 @@ class JObject(object):
 
     def init(self, value):
         """Initialize the subtree under self's address.
-        
+
         Assume there is no values in the subtree (other than its root) and
         hence garbage collection is not needed.
         """
@@ -218,8 +218,6 @@ class JDict(JObject):
         key = str(key)
         return self._db[self._address + ('k', key, 'v')]
 
-    # Note that given a new key, __setitem__ must **append** the new key to the linked
-    # list of keys. The JList.append() method relies on this behavior.
     def __setitem__(self, key, value):
         key = str(key)
         if key not in self:
@@ -231,23 +229,6 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('n',)] = key
             self._db[self._address + ('p',)] = key
-            self._db[self._address + ('m', 'size')] += 1
-        self._db[self._address + ('k', key, 'v')] = value
-
-    # This method is almost the same as __setitem__, but given a new key, it prepends it
-    # to the linked list of keys, rather than append it.
-    # It is used by the JList.prepend() method.
-    def _prepend(self, key, value):
-        key = str(key)
-        if key not in self:
-            first_key = self._db[self._address + ('n',)]
-            self._db[self._address + ('k', key, 'n')] = first_key
-            self._db[self._address + ('k', key, 'p')] = None
-            if first_key is not None:
-                self._db[self._address + ('k', first_key, 'p')] = key
-            else:
-                self._db[self._address + ('p',)] = key
-            self._db[self._address + ('n',)] = key
             self._db[self._address + ('m', 'size')] += 1
         self._db[self._address + ('k', key, 'v')] = value
 
@@ -301,10 +282,6 @@ class JDict(JObject):
         return result
 
 
-def random_key():
-    return "".join((random.choice("0123456789abcdef") for i in range(16)))
-
-
 class JList(JObject):
     def __init__(self, db, address):
         self._dict = JDict(db, address)
@@ -314,34 +291,47 @@ class JList(JObject):
         for item in value:
             self.append(item)
 
-    def __iter__(self):
-        for key in self._dict:
-            yield self._dict[key]
+    def __getitem__(self, index):
+        if index not in range(len(self)):
+            raise IndexError("list index out of range")
+        return self._dict[index]
+
+    def __setitem__(self, index, value):
+        if index not in range(len(self)):
+            raise IndexError("list assignment index out of range")
+        self._dict[index] = value
 
     def __len__(self):
         return len(self._dict)
 
-    def append(self, item):
-        self._dict[random_key()] = item
+    def __iter__(self):
+        for i in range(len(self)):
+            yield self[i]
 
-    def prepend(self, item):
-        key = random_key()
-        self._dict._prepend(key, item)
+    def append(self, item):
+        self._dict[len(self)] = item
+
+    def pop(self):
+        if len(self) == 0:
+            raise IndexError("pop from empty list")
+        result = self[len(self) - 1]
+        del self._dict[len(self) - 1]
+        return result
 
     def remove(self, item):
-        for key in self._dict:
-            if self._dict[key] == item:
-                del self._dict[key]
+        for i in range(len(self)):
+            if self[i] == item:
+                for j in range(i, len(self) - 1):
+                    self[j] = self[j + 1]
+                self.pop()
+                return
+        raise ValueError("item not in list")
 
     def __contains__(self, item):
-        for key in self._dict:
-            if self._dict[key] == item:
+        for i in range(len(self)):
+            if self[i] == item:
                 return True
         return False
-
-    def cells(self):
-        for key in self._dict:
-            yield JCell(self._dict, key)
 
     def clear(self):
         self._dict.clear()
@@ -354,24 +344,6 @@ class JList(JObject):
             else:
                 result.append(item)
         return result
-
-
-class JCell(JObject):
-    def __init__(self, jdict, key):
-        self._dict = jdict
-        self._key = key
-
-    def value(self):
-        return self._dict[self._key]
-
-    def put(self, value):
-        self._dict[self._key] = value
-
-    def remove(self):
-        del self._dict[self._key]
-
-    def export(self):
-        return self.value().export()
 
 
 

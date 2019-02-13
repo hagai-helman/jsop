@@ -184,16 +184,6 @@ def test_list(ctx):
     with JSOP(JSOP_PATH) as data:
         assert data == [1, "hello", [1,2,3]]
 
-    ctx.stage("prepending items")
-    with JSOP(JSOP_PATH) as data:
-        data.prepend(5)
-        data.prepend("this")
-        data.prepend({"foo": "bar"})
-    with JSOP(JSOP_PATH) as data:
-        assert data == [{"foo": "bar"}, "this", 5, 1, "hello", [1,2,3]]
-
-    JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
-
     ctx.stage("iteration over items")
     with JSOP(JSOP_PATH) as data:
         result = []
@@ -209,7 +199,37 @@ def test_list(ctx):
         assert [1,2,3] in data
         assert [4,5,6] not in data
 
+    ctx.stage("item access")
+    JSOP(JSOP_PATH).init([[1, 2, 3], 2, 1])
+    with JSOP(JSOP_PATH) as data:
+        assert data[0] == [1,2,3]
+        assert data[1] == 2
+        assert data[2] == 1
+        assert data[0][0] == 1
+        assert data[0][1] == 2
+        assert data[0][2] == 3
+
+    ctx.stage("item assignment")
+    with JSOP(JSOP_PATH) as data:
+        data[0][2] = 4
+        data[1] = 5
+        assert data[0] == [1,2,4]
+        assert data[2] == 1
+        assert data[0][1] == 2
+        assert data[0][2] == 4
+    with JSOP(JSOP_PATH) as data:
+        assert data[1] == 5
+        assert data[0] == [1,2,4]
+
+    ctx.stage("pop from list")
+    with JSOP(JSOP_PATH) as data:
+        assert data.pop() == 1
+        assert data == [[1,2,4], 5]
+    with JSOP(JSOP_PATH) as data:
+        assert data == [[1,2,4], 5]
+
     ctx.stage("remove")
+    JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
     with JSOP(JSOP_PATH) as data:
         data.remove("hello")
     with JSOP(JSOP_PATH) as data:
@@ -226,6 +246,15 @@ def test_list(ctx):
         data.remove(1)
     with JSOP(JSOP_PATH) as data:
         assert data == [[1,2,3]]
+    with JSOP(JSOP_PATH) as data:
+        data.append(1)
+        data.append(2)
+        data.append(1)
+    with JSOP(JSOP_PATH) as data:
+        data.remove(1)
+    with JSOP(JSOP_PATH) as data:
+        assert data == [[1,2,3], 2, 1]
+
 
     ctx.stage("getting list's size")
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])
@@ -238,50 +267,18 @@ def test_list(ctx):
         data.remove("world")
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 3
-        data.prepend("world")
-        assert len(data) == 4
+        data.append("moon")
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 4
-        data.remove("world")
+    with JSOP(JSOP_PATH) as data:
+        data[3] = "world"
+    with JSOP(JSOP_PATH) as data:
+        assert len(data) == 4
+    with JSOP(JSOP_PATH) as data:
+        data.pop()
     with JSOP(JSOP_PATH) as data:
         assert len(data) == 3
 
-    ctx.stage("getting cell's value")
-    with JSOP(JSOP_PATH) as data:
-        result = []
-        for cell in data.cells():
-            result.append(cell.value())
-        assert result == [1, "hello", [1,2,3]]
-
-    ctx.stage("setting cell's value")
-    with JSOP(JSOP_PATH) as data:
-        for (i, cell) in enumerate(data.cells()):
-            if i == 1:
-                cell.put("world")
-    with JSOP(JSOP_PATH) as data:
-        assert data == [1, "world", [1,2,3]]
-
-    ctx.stage("removing a cell")
-    with JSOP(JSOP_PATH) as data:
-        for (i, cell) in enumerate(data.cells()):
-            if i == 1:
-                cell.remove()
-    with JSOP(JSOP_PATH) as data:
-        assert data == [1, [1,2,3]]
-
-    with JSOP(JSOP_PATH) as data:
-        for (i, cell) in enumerate(data.cells()):
-            if i == 0:
-                cell.remove()
-    with JSOP(JSOP_PATH) as data:
-        assert data == [[1,2,3]]
-
-    with JSOP(JSOP_PATH) as data:
-        for (i, cell) in enumerate(data.cells()):
-            if i == 0:
-                cell.remove()
-    with JSOP(JSOP_PATH) as data:
-        assert data == []
 
     ctx.stage("clear")
     JSOP(JSOP_PATH).init([1, "hello", [1,2,3]])

@@ -77,7 +77,7 @@ Finally, the value of ```DBM[addr + ["m", "size"]]``` will always store the numb
 Lists are actually identical to maps, except for two differences:
 
 * As mentioned before, ```DBM[addr] == []```, to indicate that this is a list;
-* The keys are random strings.
+* The keys are the indices (represented as strings).
 
 
 ### The Root Object

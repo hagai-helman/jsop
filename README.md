@@ -121,7 +121,7 @@ Note that like a JSON map, the keys in a JSOP map are always strings. If a diffe
 
 ### List Operations
 
-The ```JList``` object does **not** support all operations supported by a python ```list```. It should be thought of as a linked list. These are the operations it supports:
+Likewise, The ```JList``` object supports many of the operations supported by a python ```list```:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -130,26 +130,20 @@ with jsop.JSOP(path) as data:
 
     for item in my_list:
         pass                         # iteration over items
-    my_list.append(8)                # adding an item (at the end)
-    my_list.prepend(8)               # adding an item (at the beginning)
-    my_list.remove(8)                # removing an item (note: this method actually iterates over all items)
+    my_list.append(8)                # adding an item
+    eight = my_list.pop()            # removing the last item (and returning it)
+    six = my_list[1]		     # item access by index
+    my_list[1] = 9                   # item assignment
+    my_list.remove(9)                # removing an arbitrary item
     if 8 in my_list:
-        pass                         # using the "in" operator (note: this method also iterates over all items)
+        pass                         # using the "in" operator (note: this method iterates over all items)
     length = len(my_list)            # getting list's size
     if my_list == my_list:
         pass                         # comparison with a JList
     if my_list == [5,6,7]:
         pass                         # comparison with a Python list
     my_list.clear()                  # removing all items from list
-
-    for cell in my_list.cells():     # iteration over cells
-        my_value = cell.value()      # getting the value stored in a cell
-        cell.put("hello")            # setting the value stored in a cell
-        cell.remove()                # deleting a cell
-
 ```
-
-Note that indexing is not supported. If you need a list with random access, consider using a map instead.
 
 Like as in ```JDict```, ```JList``` also supports the ```export()``` method, which returns a python ```list```:
 
