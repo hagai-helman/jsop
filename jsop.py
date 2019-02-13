@@ -210,7 +210,7 @@ class JDict(JObject):
     def init(self, value):
         self._db[self._address + ('p',)] = None
         self._db[self._address + ('n',)] = None
-        self._db[self._address + ('m', 'size')] = 0
+        self._db[self._address + ('s',)] = 0
         for key in value:
             self[key] = value[key]
 
@@ -229,7 +229,7 @@ class JDict(JObject):
             else:
                 self._db[self._address + ('n',)] = key
             self._db[self._address + ('p',)] = key
-            self._db[self._address + ('m', 'size')] += 1
+            self._db[self._address + ('s',)] += 1
         self._db[self._address + ('k', key, 'v')] = value
 
     def __delitem__(self, key):
@@ -249,7 +249,7 @@ class JDict(JObject):
             self._db[self._address + ('k', next_key, 'p')] = prev_key
         else:
             self._db[self._address + ('p',)] = prev_key
-        self._db[self._address + ('m', 'size')] -= 1
+        self._db[self._address + ('s',)] -= 1
 
     def __contains__(self, key):
         key = str(key)
@@ -263,7 +263,7 @@ class JDict(JObject):
             key = next_key
 
     def __len__(self):
-        return self._db[self._address + ('m', 'size')]
+        return self._db[self._address + ('s',)]
 
     def keys(self):
         return list(self)
