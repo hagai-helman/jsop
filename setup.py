@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jsop',
-    version='0.7.1',
+    version='1.0.0',
     author='Hagai Helman Tov',
     author_email='hagai.helman@gmail.com',
     description='A way to store large amounts of JSON-style data on disk, and to access it quickly.',
@@ -13,10 +13,12 @@ setup(
     py_modules=['jsop'],
     license='MIT',
     install_requires=[],
+    python_requires='~=3.6',
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'License :: OSI Approved :: MIT License',
         'Intended Audience :: Developers',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
         ],
 )
