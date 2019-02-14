@@ -34,8 +34,13 @@ FORMAT_VERSION_MAJOR = 1
 FORMAT_VERSION_MINOR = 0
 
 #
-#   This file is divided to four sections. Each section is based on the previous
-#   sections, but totally independent of the next sections:
+#   This module handles files of the format described in docs/data_format.md,
+#   and provides the API described in README.md. One should read these two
+#   documents before modifying this module.
+#
+#   The module is divided to four sections. Each section is based on the 
+#   previous sections, but totally independent of the next sections:
+#
 #
 #  I.   DBMWrappwer
 #       ***********
@@ -51,7 +56,7 @@ FORMAT_VERSION_MINOR = 0
 #
 #       The classes defined in this section provide an interface to objects in
 #       a JSOP file - including objects that are distributed between several keys
-#       of a DBMWrapper.
+#       of a DBMWrapper (i.e. JObjects).
 #
 #       This is the core section of this module.
 #
@@ -124,6 +129,41 @@ class DBMWrapper(object):
 ####################         SECTION II: The Core         ####################
 
 
+class JObject(object):
+    """A base class for non-primitive JSON-style objects.
+    
+    Primitive objects are just stored in their addresses in the DBMWrapper.
+    Unlike them, non-primitive objects (maps and lists) are stored in
+    multiple addresses, including the root address, and other addresses in its
+    'subtree' (i.e., addresses with the root address as a prefix).
+
+    JDict and JList are classes that represent those non-primitive types.
+    This abstract class defines the common methods they must support.
+    """
+
+    def init(self, value):
+        """Initialize the subtree under self's address.
+
+        Assume there is no values in the subtree (other than its root) and
+        hence garbage collection is not needed.
+        """
+        raise NotImplemented()
+
+    def export(self):
+        """Return a copy of self, as a Python native object."""
+        raise NotImplemented()
+
+    def clear(self):
+        """Remove all sub-objects of self."""
+        raise NotImplemented()
+
+    def __eq__(self, other):
+        if isinstance(other, JObject):
+            return self.export() == other.export()
+        else:
+            return self.export() == other
+
+
 class JData(object):
     """A wrapper for DBMWrapper, that handles JObjects.
 
@@ -176,38 +216,13 @@ class JData(object):
         return address in self._db
 
 
-class JObject(object):
-    """A base class for non-primitive JSON-style objects."""
-
-    def init(self, value):
-        """Initialize the subtree under self's address.
-
-        Assume there is no values in the subtree (other than its root) and
-        hence garbage collection is not needed.
-        """
-        raise NotImplemented()
-
-    def export(self):
-        """Return a copy of self, as a Python native object."""
-        raise NotImplemented()
-
-    def clear(self):
-        """Remove all sub-objects of self."""
-        raise NotImplemented()
-
-    def __eq__(self, other):
-        if isinstance(other, JObject):
-            return self.export() == other.export()
-        else:
-            return self.export() == other
-
-
 class JDict(JObject): 
     def __init__(self, db, address):
         self._db = db
         self._address = address
 
     def init(self, value):
+        """See JObject.init() for details."""
         self._db[self._address + ('p',)] = None
         self._db[self._address + ('n',)] = None
         self._db[self._address + ('s',)] = 0
@@ -269,10 +284,12 @@ class JDict(JObject):
         return list(self)
 
     def clear(self):
+        """See JObject.clear() for details."""
         for key in self:
             del self[key]
 
     def export(self):
+        """See JObject.export() for details."""
         result = {}
         for key in self:
             if isinstance(self[key], JObject):
@@ -287,6 +304,7 @@ class JList(JObject):
         self._dict = JDict(db, address)
 
     def init(self, value):
+        """See JObject.init() for details."""
         self._dict.init({})
         for item in value:
             self.append(item)
@@ -334,9 +352,11 @@ class JList(JObject):
         return False
 
     def clear(self):
+        """See JObject.clear() for details."""
         self._dict.clear()
 
     def export(self):
+        """See JObject.export() for details."""
         result = []
         for item in self:
             if isinstance(item, JObject):
