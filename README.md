@@ -131,12 +131,12 @@ with jsop.JSOP(path) as data:
     for item in my_list:
         pass                         # iteration over items
     my_list.append(8)                # adding an item
-    eight = my_list.pop()            # removing the last item (and returning it)
+    eight = my_list.pop()            # removing (and returning) the last item
     six = my_list[1]		     # item access by index
     my_list[1] = 9                   # item assignment
     my_list.remove(9)                # removing an arbitrary item
     if 8 in my_list:
-        pass                         # using the "in" operator (note: this method iterates over all items)
+        pass                         # using the "in" operator
     length = len(my_list)            # getting list's size
     if my_list == my_list:
         pass                         # comparison with a JList
