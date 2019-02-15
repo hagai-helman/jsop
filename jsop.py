@@ -141,7 +141,7 @@ class JObject(object):
     This abstract class defines the common methods they must support.
     """
 
-    def init(self, value):
+    def _init(self, value):
         """Initialize the subtree under self's address.
 
         Assume there is no values in the subtree (other than its root) and
@@ -149,12 +149,12 @@ class JObject(object):
         """
         raise NotImplemented()
 
-    def export(self):
-        """Return a copy of self, as a Python native object."""
+    def _destroy(self):
+        """Remove all entries in the object's subtree."""
         raise NotImplemented()
 
-    def clear(self):
-        """Remove all sub-objects of self."""
+    def export(self):
+        """Return a copy of self, as a Python native object."""
         raise NotImplemented()
 
     def __eq__(self, other):
@@ -176,7 +176,7 @@ class JData(object):
 
     1. If the user tries to fetch a map or a list, it wraps it with a JDict or
        a JList object, respectively.
-    2. If the user tried to delete or override a map or a list, it first clears
+    2. If the user tried to delete or override a map or a list, it first destroys
        it, to ensure that all garbage in the database will be collected.
     """
     def __init__(self, db):
@@ -199,17 +199,17 @@ class JData(object):
         if isinstance(value, dict):
             self._db[address] = {}
             new_dict = JDict(self, address)
-            new_dict.init(value)
+            new_dict._init(value)
         elif isinstance(value, list) or isinstance(value, tuple):
             self._db[address] = []
             new_list = JList(self, address)
-            new_list.init(value)
+            new_list._init(value)
         else:
             self._db[address] = value
 
     def __delitem__(self, address):
         if address in self._db and isinstance(self[address], JObject):
-            self[address].clear()
+            self[address]._destroy()
         del self._db[address]
 
     def __contains__(self, address):
@@ -221,8 +221,8 @@ class JDict(JObject):
         self._db = db
         self._address = address
 
-    def init(self, value):
-        """See JObject.init() for details."""
+    def _init(self, value):
+        """See JObject._init() for details."""
         self._db[self._address + ('p',)] = None
         self._db[self._address + ('n',)] = None
         self._db[self._address + ('s',)] = 0
@@ -284,7 +284,6 @@ class JDict(JObject):
         return list(self)
 
     def clear(self):
-        """See JObject.clear() for details."""
         for key in self:
             del self[key]
 
@@ -298,14 +297,22 @@ class JDict(JObject):
                 result[key] = self[key]
         return result
 
+    def _destroy(self):
+        """See JObject._destroy() for details."""
+        self.clear()
+        del self._db[self._address + ('n',)]
+        del self._db[self._address + ('p',)]
+        del self._db[self._address + ('s',)]
+        
+
 
 class JList(JObject):
     def __init__(self, db, address):
         self._dict = JDict(db, address)
 
-    def init(self, value):
-        """See JObject.init() for details."""
-        self._dict.init({})
+    def _init(self, value):
+        """See JObject._init() for details."""
+        self._dict._init({})
         for item in value:
             self.append(item)
 
@@ -352,7 +359,6 @@ class JList(JObject):
         return False
 
     def clear(self):
-        """See JObject.clear() for details."""
         self._dict.clear()
 
     def export(self):
@@ -364,6 +370,10 @@ class JList(JObject):
             else:
                 result.append(item)
         return result
+
+    def _destroy(self):
+        """See JObject._destroy() for details."""
+        self._dict._destroy()
 
 
 
