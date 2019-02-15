@@ -27,7 +27,7 @@ For the full documentation, see https://github.com/hagai-helman/jsop.
 
 import dbm
 import json
-import random
+from warnings import warn
 
 FORMAT_NAME = "JSOP"
 FORMAT_VERSION_MAJOR = 1
@@ -425,7 +425,8 @@ class JSOP(object):
             jdata[()] = obj
 
     def dump(self, obj = {}):
-        """Synonym of init()."""
+        """DEPRECATED. Synonym of init()."""
+        warn(DeprecationWarning("JSOP.dump() is DEPRECATED. Use JSOP.init() instead."))
         self.init(obj)
 
     def export(self):
@@ -434,7 +435,8 @@ class JSOP(object):
             return data.export()
 
     def load(self):
-        """Synonym of export()."""
+        """DEPRECATED. Synonym of export()."""
+        warn(DeprecationWarning("JSOP.load() is DEPRECATED. Use JSOP.export() instead."))
         return self.export()
 
     def __enter__(self):
