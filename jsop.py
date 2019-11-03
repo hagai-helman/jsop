@@ -287,6 +287,57 @@ class JDict(JObject):
         for key in self:
             del self[key]
 
+    def update(self, other = None, **kw):
+        if other is not None:
+            if hasattr(other, "keys"):
+                for k in other.keys():
+                    self[k] = other[k]
+            else:
+                for (k, v) in other:
+                    self[k] = v
+        self.update(kw)
+
+    def get(self, key, default=None):
+        if key in self:
+            return self[key]
+        else:
+            return default
+
+    def pop(self, k, *args):
+        if len(args) > 1:
+            raise TypeError("pop() expected at most 2 arguments, got {}".format(len(args) + 1))
+        if k in self:
+            v = self[k]
+            del self[k]
+            return v
+        else:
+            if len(args) == 1:
+                return args[0]
+            else:
+                raise KeyError(k)
+
+    def popitem(self):
+        if len(self) == 0:
+            raise KeyError("popitem(): dictionary is empty")
+        key = next(iter(self))
+        return (key, self.pop(key))
+
+    def setdefault(self, key, default = None):
+        if key not in self:
+            self[key] = default
+        return self[key]
+
+    def values(self):
+        for key in self:
+            yield self[key]
+
+    def items(self):
+        for key in self:
+            yield (key, self[key])
+
+    def copy(self):
+        return self.export()
+
     def export(self):
         """See JObject.export() for details."""
         result = {}
@@ -333,6 +384,48 @@ class JList(JObject):
         for i in range(len(self)):
             yield self[i]
 
+    def __reversed__(self):
+        for i in range(len(self) - 1, -1, -1):
+            yield self[i]
+
+    def __add__(self, other):
+        return list(self) + other
+
+    def __iadd__(self, other):
+        self.extend(other)
+
+    def __mul__(self, other):
+        return list(self) * other
+
+    def __rmul__(self, other):
+        return other * list(self)
+
+    def __imul__(self, other):
+        self.extend(self * (other - 1))
+
+    def __delitem__(self, index):
+        if index >= len(self) or index < -len(self):
+            raise IndexError("list assignment out of range")
+        elif index < 0:
+            del self[len(self) + index]
+        else:
+            for i in range(index, len(self)):
+                self[i] = self[i + 1]
+            self.pop()
+
+    def insert(self, index, value):
+        if index >= len(self):
+            self.append(value)
+        elif index < -len(self):
+            self.insert(0, value)
+        elif index < 0:
+            self.insert(len(self) + index, value)
+        else:
+            self.append(None)
+            for i in range(len(self) - 1, index, -1):
+                self[i] = self[i - 1]
+            self[index] = value
+
     def append(self, item):
         self._dict[len(self)] = item
 
@@ -357,6 +450,39 @@ class JList(JObject):
             if self[i] == item:
                 return True
         return False
+
+    def sort(self, *args, **kw):
+        exported = self.export()
+        exported.sort()
+        self.clear()
+        self.extend(exported)
+
+    def reverse(self):
+        exported = self.export()
+        exported.reverse()
+        self.clear()
+        self.extend(exported)
+
+    def index(self, value, start = 0, stop = 9223372036854775807):
+        for i in range(start, min(len(self), stop)):
+            if self[i] == value:
+                return i
+        raise ValueError("{} is not in list".format(value))
+
+    def count(self, value):
+        counter = 0
+        for item in self:
+            if item == value:
+                counter += 1
+        return counter
+
+    def copy(self):
+        return self.export()
+
+    def extend(self, other):
+        for item in other:
+            self.append(item)
+
 
     def clear(self):
         self._dict.clear()
