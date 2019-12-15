@@ -192,10 +192,10 @@ class JData(object):
             return value
 
     def __setitem__(self, address, value):
-        if address in self._db:
-            del self[address]
         if isinstance(value, JObject):
             value = value.export()
+        if address in self._db:
+            del self[address]
         if isinstance(value, dict):
             self._db[address] = {}
             new_dict = JDict(self, address)
@@ -368,13 +368,17 @@ class JList(JObject):
             self.append(item)
 
     def __getitem__(self, index):
-        if index not in range(len(self)):
+        if index not in range(-len(self), len(self)):
             raise IndexError("list index out of range")
+        elif index < 0:
+            return self[len(self) + index]
         return self._dict[index]
 
     def __setitem__(self, index, value):
-        if index not in range(len(self)):
+        if index not in range(-len(self), len(self)):
             raise IndexError("list assignment index out of range")
+        elif index < 0:
+            self[len(self) + index] = value
         self._dict[index] = value
 
     def __len__(self):
