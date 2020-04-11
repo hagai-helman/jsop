@@ -163,6 +163,8 @@ class JObject(object):
         else:
             return self.export() == other
 
+def referror(ref):
+    return JSOPError("Invalid Reference: " + "".join(["[{}]".format(repr(index)) for index in ref[1::3]]))
 
 class JData(object):
     """A wrapper for DBMWrapper, that handles JObjects.
@@ -183,7 +185,10 @@ class JData(object):
         self._db = db
 
     def __getitem__(self, address):
-        value = self._db[address]
+        try:
+            value = self._db[address]
+        except:
+            raise referror(address)
         if isinstance(value, dict):
             return JDict(self, address)
         elif isinstance(value, list):
@@ -210,7 +215,10 @@ class JData(object):
     def __delitem__(self, address):
         if address in self._db and isinstance(self[address], JObject):
             self[address]._destroy()
-        del self._db[address]
+        try:
+            del self._db[address]
+        except:
+            raise referror(address)
 
     def __contains__(self, address):
         return address in self._db
@@ -295,19 +303,24 @@ class JDict(JObject):
             else:
                 for (k, v) in other:
                     self[k] = v
-        self.update(kw)
+        if len(kw) > 0:
+            self.update(kw)
 
     def get(self, key, default=None):
+        key = str(key)
         if key in self:
             return self[key]
         else:
             return default
 
     def pop(self, k, *args):
+        k = str(k)
         if len(args) > 1:
             raise TypeError("pop() expected at most 2 arguments, got {}".format(len(args) + 1))
         if k in self:
             v = self[k]
+            if isinstance(v, JObject):
+                v = v.export()
             del self[k]
             return v
         else:
@@ -323,6 +336,7 @@ class JDict(JObject):
         return (key, self.pop(key))
 
     def setdefault(self, key, default = None):
+        key = str(key)
         if key not in self:
             self[key] = default
         return self[key]
@@ -395,8 +409,12 @@ class JList(JObject):
     def __add__(self, other):
         return list(self) + other
 
+    def __radd__(self, other):
+        return other + list(self)
+
     def __iadd__(self, other):
         self.extend(other)
+        return self
 
     def __mul__(self, other):
         return list(self) * other
@@ -406,6 +424,7 @@ class JList(JObject):
 
     def __imul__(self, other):
         self.extend(self * (other - 1))
+        return self
 
     def __delitem__(self, index):
         if index >= len(self) or index < -len(self):
@@ -413,7 +432,7 @@ class JList(JObject):
         elif index < 0:
             del self[len(self) + index]
         else:
-            for i in range(index, len(self)):
+            for i in range(index, len(self) - 1):
                 self[i] = self[i + 1]
             self.pop()
 
@@ -436,16 +455,12 @@ class JList(JObject):
     def pop(self):
         if len(self) == 0:
             raise IndexError("pop from empty list")
-        result = self[len(self) - 1]
-        del self._dict[len(self) - 1]
-        return result
+        return self._dict.pop(len(self) - 1)
 
     def remove(self, item):
         for i in range(len(self)):
             if self[i] == item:
-                for j in range(i, len(self) - 1):
-                    self[j] = self[j + 1]
-                self.pop()
+                del self[i]
                 return
         raise ValueError("item not in list")
 
