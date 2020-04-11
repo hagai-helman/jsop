@@ -82,7 +82,7 @@ However, when you retrieve a map or a list, you get special objects, named ```JD
 
 ### Map Operations
 
-With ```JDict```, you can do most of the things you can do with a python ```dict```:
+With ```JDict```, you can do most of the things you can do with a python ```dict```. For example:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -105,7 +105,7 @@ with jsop.JSOP(path) as data:
     my_map.clear()                   # removing all keys from a map
 ```
 
-Also, you can convert the map to a regular python ```dict```, by using the ```export()``` method:
+Also, you can convert the map to a regular python ```dict```, using the ```export()``` method:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -121,7 +121,7 @@ Note that like a JSON map, the keys in a JSOP map are always strings. If a diffe
 
 ### List Operations
 
-Likewise, The ```JList``` object supports many of the operations supported by a python ```list```:
+Likewise, The ```JList``` object supports virtually all operations supported by a python ```list```. For Example:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -132,7 +132,7 @@ with jsop.JSOP(path) as data:
         pass                         # iteration over items
     my_list.append(8)                # adding an item
     eight = my_list.pop()            # removing (and returning) the last item
-    six = my_list[1]		     # item access by index
+    six = my_list[1]    	         # item access by index
     my_list[1] = 9                   # item assignment
     my_list.remove(9)                # removing an arbitrary item
     if 8 in my_list:
@@ -145,7 +145,7 @@ with jsop.JSOP(path) as data:
     my_list.clear()                  # removing all items from list
 ```
 
-Like as in ```JDict```, ```JList``` also supports the ```export()``` method, which returns a python ```list```:
+Like as in ```JDict```, ```JList``` also supports the ```export()```  method, which returns a python ```list```:
 
 ```python
 with jsop.JSOP(path) as data:
@@ -153,9 +153,31 @@ with jsop.JSOP(path) as data:
     # type(my_list) is list
 ```
 
+### Handling References
+
+One should be a bit careful when keeping references to ```JDict``` and ```JList``` objects.
+
+Unlike Python's regular ```dict``` and ```list``` objects, these are not references to objects in memory, but to certain "paths" in the JSOP root object. For example:
+
+```python
+with jsop.JSOP(path) as data:
+    data["list_of_lists"] = [[1,2,3], [4,5,6]]
+
+    item = data["list_of_lists"][0]
+    # Since `item` is a JList, it is a reference to the first item of
+    # the list under the key "list_of_lists" in `data`.
+
+    del data["list_of_lists"]
+    # Now the list_of_lists does not exit, and `item` became an 
+    # invalid reference.
+
+    print(item[2])
+    # This will raise an exception.
+```
+
 ## Copy and Backup
 
-In order to create copy a JSOP file, it is recommended to export its content to JSON. The reason is that JSON files take less space, and also because of partability: this practice avoids problems resulting from the use of different ```dbm``` implementations on different systems.
+In order to create copy a JSOP file, it is recommended to export its content to JSON. The reason is that JSON files take less space, and also because of portability: this practice avoids problems resulting from the use of different ```dbm``` implementations on different systems.
 
 This can be done from the command line:
 
@@ -164,3 +186,4 @@ python3 -m jsop export /path/to/jsop /path/to/copy.json
 ```
 
 If JSON file path is not given, the result will be printed to the standard output.
+
