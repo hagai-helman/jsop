@@ -324,7 +324,7 @@ def define_stages(tester):
 if __name__ == "__main__":
 
     if len(sys.argv) != 2:
-        print("usage: {} <JSOP-temp-file-path>".format(argv[0]))
+        print("usage: {} <JSOP-temp-file-path>".format(sys.argv[0]))
 
     tester = JSOPTester(sys.argv[1])
     define_stages(tester)
