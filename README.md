@@ -175,6 +175,14 @@ with jsop.JSOP(path) as data:
     # This will raise an exception.
 ```
 
+## Locking
+
+If multiple concurrent processes may access the database simultaneously, you need a locking mechanism to ensure data consistency.
+
+Some DBM implementations, such as GDBM, provide an internal locking mechanism. For others, such as NDBM, you need to use an external locking mechanism, that may depend on your specific OS and file system (but in most cases, [`filelock`](https://py-filelock.readthedocs.io/) is the solution).
+
+In either case, it's best to distinguish between read-only access and full access. When you need read-only access to the database, You can use `JSOP(path, readonly=True)`. It prevents writing, and it also passes the flag forward to the DBM implementation.
+
 ## Copy and Backup
 
 In order to create copy a JSOP file, it is recommended to export its content to JSON. The reason is that JSON files take less space, and also because of portability: this practice avoids problems resulting from the use of different ```dbm``` implementations on different systems.
@@ -186,4 +194,15 @@ python3 -m jsop export /path/to/jsop /path/to/copy.json
 ```
 
 If JSON file path is not given, the result will be printed to the standard output.
+
+## Choosing DBM Implementation
+
+You can choose which DBM implementation to use, by overriding the `jsop.dbm` variable. For example:
+
+```python
+import jsop
+import dbm.gnu
+
+jsop.dbm = dbm.gnu
+```
 
