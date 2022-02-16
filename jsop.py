@@ -26,6 +26,7 @@ For the full documentation, see https://github.com/hagai-helman/jsop.
 """
 
 import dbm
+import io
 import json
 from warnings import warn
 
@@ -42,7 +43,7 @@ FORMAT_VERSION_MINOR = 0
 #   previous sections, but totally independent of the next sections:
 #
 #
-#  I.   DBMWrappwer
+#  I.   DBMWrapper
 #       ***********
 #
 #       A class that wraps a DBM object, to store a mapping of:
@@ -123,6 +124,15 @@ class DBMWrapper(object):
 
     def keys(self):
         return [tuple([s.decode("utf8") for s in bkey.split(b'\xff')]) for bkey in self._dbm.keys()]
+
+
+class ReadOnlyDBMWrapper(DBMWrapper):
+    """A DBMWrapper that prevents writing to the DBM."""
+    def __setitem__(self, key, value):
+        raise io.UnsupportedOperation("not writable")
+
+    def __delitem__(self, key):
+        raise io.UnsupportedOperation("not writable")
 
 
 
@@ -557,11 +567,14 @@ class JSOP(object):
     For the full documentation, see https://github.com/hagai-helman/jsop.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename, readonly=False):
         self._filename = filename
+        self._readonly = readonly
 
     def init(self, obj = {}):
         """Store a JSON-encodable object in a new JSOP file."""
+        if self._readonly:
+            raise io.UnsupportedOperation("not writable")
         with DBMWrapper(self._filename, "n") as dbmw:
             jdata = JData(dbmw)
             jdata[("m", "format-name")] = FORMAT_NAME
@@ -599,7 +612,10 @@ class JSOP(object):
         supported_format &= (format_version_minor <= FORMAT_VERSION_MINOR)
         if not supported_format:
             raise JSOPError("Unsupported format version: {} {}.{}".format(format_name, format_version_major, format_version_minor))
-        self._dbmw = DBMWrapper(self._filename, "w").__enter__()
+        if self._readonly:
+            self._dbmw = ReadOnlyDBMWrapper(self._filename, "r").__enter__()
+        else:
+            self._dbmw = DBMWrapper(self._filename, "w").__enter__()
         return JData(self._dbmw)[()]
 
     def __exit__(self, *args):
@@ -614,6 +630,7 @@ __all__ = ["JSOP", "JSOPError"]
 
 
 import sys
+import typing
 
 def print_usage():
     print("""
@@ -632,6 +649,7 @@ def print_usage():
     """)
 
 if __name__ == "__main__":
+    json_path : typing.Optional[str]
     if 3 <= len(sys.argv) <= 4 and sys.argv[1] in ["init", "export"]:
         command = sys.argv[1]
         path = sys.argv[2]
