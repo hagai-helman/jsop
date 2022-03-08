@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jsop',
-    version='1.2.0',
+    version='1.3.0',
     author='Hagai Helman Tov',
     author_email='hagai.helman@gmail.com',
     description='Store big JSON-style files, but access the data quickly.',

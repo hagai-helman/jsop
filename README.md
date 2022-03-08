@@ -195,6 +195,8 @@ python3 -m jsop export /path/to/jsop /path/to/copy.json
 
 If JSON file path is not given, the result will be printed to the standard output.
 
+Note that the output of dictionaries will be sorted by key, to ensure efficency of diff-based backup systems.
+
 ## Choosing DBM Implementation
 
 You can choose which DBM implementation to use, by overriding the `jsop.dbm` variable. For example:

@@ -667,9 +667,9 @@ if __name__ == "__main__":
 
         elif command == "export":
             if json_path is None:
-                print(json.dumps(JSOP(path).export(), indent=1))
+                print(json.dumps(JSOP(path).export(), indent=1, sort_keys=True))
             else:
-                json.dump(JSOP(path).export(), open(json_path, "w"))
+                json.dump(JSOP(path).export(), open(json_path, "w"), indent=0, sort_keys=True)
     else:
         print_usage()
         exit(1)
