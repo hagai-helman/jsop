@@ -1,38 +1,44 @@
 # JSOP - JSON-Style Object Persistence
 
-**JSOP** is a persistence engine that allows an application to store a large amount of JSON-style data on disk, but to access it in an efficient way.
+**JSOP** is a Python persistence engine designed to efficiently store and access JSON-style data on disk. It simplifies data management using a user-friendly API, making it an ideal choice for applications that need to handle substantial amounts of structured data with ease.
 
-It is based on the ```dbm``` module, but offers a much easier-to-use API.
+## Key Features
 
-JSOP is also designed to enable easy migration of data in existing applications, that already store data in JSON files, with minimal changes to the code.
+- **Efficient Data Storage:** JSOP is built on the `dbm` module, providing efficient storage capabilities.
+
+- **User-Friendly API:** We've made data management straightforward, so you can get your project up and running with minimal effort.
+
+- **Seamless Migration:** If your existing applications already store data in JSON files, JSOP allows you to migrate with minimal code changes, ensuring a smooth transition.
 
 ## Installation
+
+Install JSOP using pip:
 
 ```bash
 pip3 install jsop
 ```
 
-## Quickstart Guide
+## Quick Start
 
-### Creating a new JSOP file
+### Creating a New JSOP File
 
-Programmatically :
+#### Programmatically
 
 ```python
-# 'data' is any JSON-serializable object.
-
 import jsop
 
+# Initialize JSOP with your JSON-serializable data.
+data = {...}  # Your JSON data here
 jsop.JSOP("/path/to/jsop").init(data)
 ```
 
-Or from the command line:
+#### From the Command Line
 
 ```bash
 python3 -m jsop init /path/to/jsop /path/to/data.json
 ```
 
-(If an initial JSON file is not given, the file will be initialized with an empty map.)
+(If no initial JSON file is provided, the file will be initialized with an empty map.)
 
 ### Read and Write
 
@@ -48,46 +54,42 @@ with jsop.JSOP("/path/to/jsop") as data:
 
 ### Assignments
 
-You can store any JSON-serializable data with JSOP using simple assignment. For example:
+Store JSON-serializable data using simple assignments:
 
 ```python
 path = "/path/to/jsop"
 
-jsop.JSOP(path).init()      # initalize with an empty map.
+jsop.JSOP(path).init()      # Initialize with an empty map.
 
 with jsop.JSOP(path) as data:
     data["string"] = "Hello, World!"
     data["boolean"] = True
     data["map"] = {"a": 1, "b": 2, "c": 3}
     data["map"]["d"] = 4
-    data["map"]["list"] = [5,6,7]
+    data["map"]["list"] = [5, 6, 7]
 ```
 
-The file will be saved once the ```with``` block exits.
+The file will be saved when the `with` block exits.
 
 ### Accessing Data
 
-When you retrieve data of primitive types, you just get the corresponding python type:
+Retrieve data of primitive types and get the corresponding Python type:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_string = data["string"]
-    # type(my_string) is str
-
-    my_int = data["map"]["c"]
-    # type(my_int) is int
+    my_string = data["string"]  # type(my_string) is str
+    my_int = data["map"]["c"]  # type(my_int) is int
 ```
 
-However, when you retrieve a map or a list, you get special objects, named ```JDict``` and ```JList```, respectively.
+When you retrieve a map or a list, you get special objects, named `JDict` and `JList`, respectively.
 
 ### Map Operations
 
-With ```JDict```, you can do most of the things you can do with a python ```dict```. For example:
+With `JDict`, you can perform various operations similar to a Python `dict`:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_map = data["map"]
-    # type(my_map) is JDict
+    my_map = data["map"]  # type(my_map) is JDict
     
     a = my_map["a"]                  # item access
     my_map["b"] = 3                  # item assignment
@@ -95,7 +97,7 @@ with jsop.JSOP(path) as data:
     if "d" in my_map:
         pass                         # using the "in" operator
     length = len(my_map)             # getting map's size
-    keys = my_map.keys()             # getting list of keys
+    keys = my_map.keys()             # getting a list of keys
     for key in my_map:
         pass                         # iteration over keys
     if my_map == my_map:
@@ -105,71 +107,62 @@ with jsop.JSOP(path) as data:
     my_map.clear()                   # removing all keys from a map
 ```
 
-Also, you can convert the map to a regular python ```dict```, using the ```export()``` method:
+You can also convert the map to a regular Python `dict` using the `export()` method:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_map = data["map"].export()
-    # type(my_map) is dict
+    my_map = data["map"].export()  # type(my_map) is dict
 
     my_map["e"] = 5
 
     data["map"] = my_map
 ```
 
-Note that like a JSON map, the keys in a JSOP map are always strings. If a different object is given as a key, it is converted to a string.
-
 ### List Operations
 
-Likewise, The ```JList``` object supports virtually all operations supported by a python ```list```. For Example:
+Similarly, the `JList` object supports most operations supported by a Python `list`:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_list = data["map"]["list"]
-    # type(my_list) is JList
+    my_list = data["map"]["list"]  # type(my_list) is JList
 
     for item in my_list:
         pass                         # iteration over items
     my_list.append(8)                # adding an item
     eight = my_list.pop()            # removing (and returning) the last item
-    six = my_list[1]    	         # item access by index
+    six = my_list[1]                 # item access by index
     my_list[1] = 9                   # item assignment
     my_list.remove(9)                # removing an arbitrary item
     if 8 in my_list:
         pass                         # using the "in" operator
-    length = len(my_list)            # getting list's size
+    length = len(my_list)            # getting the list's size
     if my_list == my_list:
         pass                         # comparison with a JList
-    if my_list == [5,6,7]:
+    if my_list == [5, 6, 7]:
         pass                         # comparison with a Python list
-    my_list.clear()                  # removing all items from list
+    my_list.clear()                  # removing all items from the list
 ```
 
-Like as in ```JDict```, ```JList``` also supports the ```export()```  method, which returns a python ```list```:
+Like in `JDict`, `JList` also supports the `export()` method, which returns a Python `list`:
 
 ```python
 with jsop.JSOP(path) as data:
-    my_list = data["map"]["list"].export()
-    # type(my_list) is list
+    my_list = data["map"]["list"].export()  # type(my_list) is list
 ```
 
 ### Handling References
 
-One should be a bit careful when keeping references to ```JDict``` and ```JList``` objects.
-
-Unlike Python's regular ```dict``` and ```list``` objects, these are not references to objects in memory, but to certain "paths" in the JSOP root object. For example:
+Be cautious when keeping references to `JDict` and `JList` objects. Unlike Python's regular `dict` and `list` objects, these are references to specific "paths" in the JSOP root object:
 
 ```python
 with jsop.JSOP(path) as data:
-    data["list_of_lists"] = [[1,2,3], [4,5,6]]
+    data["list_of_lists"] = [[1, 2, 3], [4, 5, 6]]
 
     item = data["list_of_lists"][0]
-    # Since `item` is a JList, it is a reference to the first item of
-    # the list under the key "list_of_lists" in `data`.
+    # `item` is a reference to the first item of the list under the key "list_of_lists" in `data`.
 
     del data["list_of_lists"]
-    # Now the list_of_lists does not exit, and `item` became an 
-    # invalid reference.
+    # The "list_of_lists" no longer exists, and `item` becomes an invalid reference.
 
     print(item[2])
     # This will raise an exception.
@@ -177,29 +170,23 @@ with jsop.JSOP(path) as data:
 
 ## Locking
 
-If multiple concurrent processes may access the database simultaneously, you need a locking mechanism to ensure data consistency.
+If multiple concurrent processes may access the database simultaneously, you need a locking mechanism to ensure data consistency. Some DBM implementations provide internal locking, while others require an external mechanism like [`filelock`](https://py-filelock.readthedocs.io/).
 
-Some DBM implementations, such as GDBM, provide an internal locking mechanism. For others, such as NDBM, you need to use an external locking mechanism, that may depend on your specific OS and file system (but in most cases, [`filelock`](https://py-filelock.readthedocs.io/) is the solution).
-
-In either case, it's best to distinguish between read-only access and full access. When you need read-only access to the database, You can use `JSOP(path, readonly=True)`. It prevents writing, and it also passes the flag forward to the DBM implementation.
+When you need read-only access, consider using `JSOP(path, readonly=True)` to prevent writing and pass the flag to the DBM implementation.
 
 ## Copy and Backup
 
-In order to create copy a JSOP file, it is recommended to export its content to JSON. The reason is that JSON files take less space, and also because of portability: this practice avoids problems resulting from the use of different ```dbm``` implementations on different systems.
-
-This can be done from the command line:
+To create a copy of a JSOP file, it's recommended to export its content to JSON. This reduces storage space and ensures portability across different systems (and specifically, different DBM implementations):
 
 ```bash
 python3 -m jsop export /path/to/jsop /path/to/copy.json
 ```
 
-If JSON file path is not given, the result will be printed to the standard output.
-
-Note that the output of dictionaries will be sorted by key, to ensure efficency of diff-based backup systems.
+If no JSON file path is given, the result will be printed to the standard output. Dictionaries are sorted by key to ensure efficiency in diff-based backup systems.
 
 ## Choosing DBM Implementation
 
-You can choose which DBM implementation to use, by overriding the `jsop.dbm` variable. For example:
+You can choose the DBM implementation to use by overriding the `jsop.dbm` variable. For example:
 
 ```python
 import jsop
